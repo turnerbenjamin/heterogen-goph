@@ -1,0 +1,1 @@
+go build -o ./out ./cmd/main.go  && ./out --mode=development

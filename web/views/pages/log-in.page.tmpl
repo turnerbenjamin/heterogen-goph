@@ -1,0 +1,29 @@
+{{template "base" .}}
+
+{{define "cssImports"}}
+<link rel="stylesheet" href="/assets/css/form.css">
+{{end}}
+
+
+{{define "title"}}
+HeteroGen - Log-In
+{{end}}
+
+{{define "content"}}
+<section class="auth-form">
+    <form hx-post="/log-in" hx-swap="none" hx-disable>
+        <h2 class="form-heading">Log-In</h2>
+        <div class="field-group">
+            <div class="form-item">
+                <label for="email_address">Email Address</label>
+                <input type="email" placeholder="your@email.com" name="email_address" id="email_address" />
+            </div>
+            <div class="form-item">
+                <label for="password">Password</label>
+                <input type="password" placeholder="password" name="password" id="password" />
+            </div>
+        </div>
+        <button type="submit" class="primary">Log-In</button>
+    </form>
+</section>
+{{end}}

@@ -1,0 +1,38 @@
+{{define "base"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="/assets/js/htmx.min.js" defer></script>
+    <script src="/assets/js/htmx-response-targets.js" defer></script>
+    <link rel="stylesheet" href="/assets/css/style.css" defer>
+    {{block "cssImports" .}}
+    {{end}}
+    {{block "js" .}}
+    {{end}}
+    <title>
+        {{block "title" .}}
+        {{end}}
+    </title>
+</head>
+
+<body>
+    <header>
+        <a class="title" href="/">
+        <div class="logo-wrapper">
+            <img src="/assets/images/logo/hg.logo.png" alt="logo"/>
+        </div>
+            <h1>HeteroGen</h1>
+    </a>
+    <nav>
+        <a href="/register"><button class="primary">Register</button></a>
+        <a href="/log-in"><button >Log-In</button></a>
+    </nav>
+    </header>
+    {{block "content" .}}
+    {{end}}
+</body>
+
+</html>
+{{end}}

@@ -1,0 +1,61 @@
+{{template "base" .}}
+
+{{define "cssImports"}}
+<link rel="stylesheet" href="/assets/css/form.css">
+{{end}}
+
+{{define "title"}}
+HeteroGen - Registration
+{{end}}
+
+{{define "content"}}
+<section class="auth-form">
+    <p>{{.Test}}</p>
+    <form hx-ext="response-targets" hx-post="/register" hx-target-400="#registration-form-error-target" hx-disabled-elt="this" hx-on::after-request="this.classList.remove('htmx-request')">
+        <h2 class="form-heading">Register</h2>
+        <div class="field-group">
+            <div class="form-item">
+                <label for="email_address">Email Address</label>
+                <input type="email" placeholder="your@email.com" name="email_address" id="email_address" {{range
+                    $attribute :=.EmailAddress}} {{$attribute}} {{end}} />
+            </div>
+        </div>
+        <div class="field-group">
+            <div class="form-item">
+                <label for="first_name">First Name</label>
+                <input type="text" placeholder="Jane" name="first_name" id="first_name" {{range $attribute
+                    :=.FirstName}} {{$attribute}} {{end}} >
+
+                <div class="form-item required">
+                    <label for="last_name">Last Name</label>
+                    <input type="text" placeholder="Doe" name="last_name" id="last_name" {{range $attribute
+                        :=.LastName}} {{$attribute}} {{end}} />
+                </div>
+            </div>
+            <div class="field-group">
+                <div class="form-item required">
+                    <label for="business">Business</label>
+                    <input type="text" placeholder="Your business" name="business" id="business" {{range $attribute
+                        :=.Business}} {{$attribute}} {{end}} />
+                </div>
+            </div>
+            <div class="field-group">
+                <div class="form-item required">
+                    <label for="password">Password</label>
+                    <input type="password" placeholder="password" name="password" id="password" {{range $attribute
+                        :=.Password}} {{$attribute}} {{end}}
+                        onchange="this.setCustomValidity(this.validity.patternMismatch ? 'Must have at least 6 characters' : ''); if(this.checkValidity()) form.confirmPassword.pattern = this.value;" />
+
+                </div>
+                <div class="form-item required">
+                    <label for="confirm-password">Confirm password</label>
+                    <input type="password" placeholder="password" name="confirm-password" id="confirmPassword" required
+                    pattern=""
+                        onchange="this.setCustomValidity(this.validity.patternMismatch ? 'The passwords do not match' : '');" />
+                </div>
+            </div>
+            <div id="registration-form-error-target"></div>
+            <button type="submit" class="primary">Register</button>
+    </form>
+</section>
+{{end}}
