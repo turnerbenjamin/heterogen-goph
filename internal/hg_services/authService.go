@@ -6,10 +6,12 @@ import (
 	"strings"
 
 	"github.com/turnerbenjamin/heterogen-go/internal/db_models"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type HgAuthService interface {
 	Create(db_models.User) (*db_models.User, string)
+	SignIn(string, string) (*db_models.User, string)
 }
 
 type authService struct {
@@ -33,10 +35,8 @@ func (authSvc *authService) Create(usr db_models.User) (*db_models.User, string)
 	RETURNING id, email_address, first_name, last_name, business, permissions
 	;
 	`
-
-	fmt.Println(usr)
 	var newUser db_models.User
-	rows, err := authSvc.db.Query(baseQuery, usr.Id, usr.EmailAddress, usr.FirstName, usr.LastName, usr.Business, usr.Password, usr.Permissions)
+	rows, err := authSvc.db.Query(baseQuery, usr.Id, usr.EmailAddress, usr.FirstName, usr.LastName, usr.Business, usr.HashedPassword, usr.Permissions)
 	if err != nil {
 		msg := "Server error"
 		if strings.Contains(err.Error(), "users_email_address_key") {
@@ -54,4 +54,34 @@ func (authSvc *authService) Create(usr db_models.User) (*db_models.User, string)
 		}
 	}
 	return &newUser, ""
+}
+
+func (authSvc *authService) SignIn(emailAddress string, password string) (*db_models.User, string) {
+	baseQuery := `
+	SELECT id, email_address, password, first_name, last_name, business, permissions FROM users
+	WHERE email_address=$1
+	;
+	`
+
+	//Select user
+	var user db_models.User
+	row := authSvc.db.QueryRow(baseQuery, emailAddress)
+
+	//Scan row to user struct
+	err := row.Scan(&user.Id, &user.EmailAddress, &user.Password, &user.FirstName, &user.LastName, &user.Business, &user.Permissions)
+	if err != nil {
+		fmt.Println(err)
+		return &user, "Email not found"
+	}
+
+	//Validate password
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
+	fmt.Println(user.Password, password)
+	if err != nil {
+		return &user, "Password wrong"
+	}
+
+	user.Password = ""
+
+	return &user, ""
 }

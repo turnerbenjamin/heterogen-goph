@@ -1,8 +1,5 @@
 {{template "base" .}}
 
-{{define "cssImports"}}
-<link rel="stylesheet" href="/assets/css/form.css">
-{{end}}
 
 {{define "title"}}
 HeteroGen - Registration
@@ -11,7 +8,7 @@ HeteroGen - Registration
 {{define "content"}}
 <section class="auth-form">
     <p>{{.Test}}</p>
-    <form hx-ext="response-targets" hx-post="/register" hx-target-400="#registration-form-error-target" hx-disabled-elt="this" hx-on::after-request="this.classList.remove('htmx-request')">
+    <form hx-ext="response-targets" hx-post="/register" hx-target-error="#registration-form-error-target" hx-disabled-elt="this" hx-on::after-request="this.classList.remove('htmx-request')">
         <h2 class="form-heading">Register</h2>
         <div class="field-group">
             <div class="form-item">
@@ -54,7 +51,7 @@ HeteroGen - Registration
                         onchange="this.setCustomValidity(this.validity.patternMismatch ? 'The passwords do not match' : '');" />
                 </div>
             </div>
-            <div id="registration-form-error-target"></div>
+            <div id="registration-form-error-target" class="error-messages"></div>
             <button type="submit" class="primary">Register</button>
     </form>
 </section>

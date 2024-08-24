@@ -10,18 +10,20 @@ import (
 )
 
 type User struct {
-	Id           string
-	EmailAddress validator.ValidatedString
-	FirstName    validator.ValidatedString
-	LastName     validator.ValidatedString
-	Business     validator.ValidatedString
-	Password     validator.ValidatedString
-	Permissions  pq.StringArray
+	Id             string
+	EmailAddress   validator.ValidatedString
+	FirstName      validator.ValidatedString
+	LastName       validator.ValidatedString
+	Business       validator.ValidatedString
+	Password       validator.ValidatedString
+	HashedPassword string
+	Permissions    pq.StringArray
 }
 
 var UserValidationRules = map[string]*validator.ValidationRules{
 	"EmailAddress": {
 		Required: true,
+		IsEmail:  true,
 	},
 	"FirstName": {
 		Required:  true,
@@ -79,17 +81,33 @@ func UserFromForm(r *http.Request) (User, error) {
 
 func (u *User) Validate() (bool, []string) {
 	errorMessages := []string{}
-	isValidated := true
 
-	for key, vr := range UserValidationRules {
-		ok, err := u.EmailAddress.Validate(key, vr)
-		if !ok {
-			errorMessages = append(errorMessages, err)
-			isValidated = false
-		}
+	ok, err := u.EmailAddress.Validate("EmailAddress", UserValidationRules["EmailAddress"])
+	if !ok {
+		errorMessages = append(errorMessages, err)
 	}
 
-	return isValidated, errorMessages
+	ok, err = u.FirstName.Validate("FirstName", UserValidationRules["FirstName"])
+	if !ok {
+		errorMessages = append(errorMessages, err)
+	}
+
+	ok, err = u.LastName.Validate("LastName", UserValidationRules["LastName"])
+	if !ok {
+		errorMessages = append(errorMessages, err)
+	}
+
+	ok, err = u.Business.Validate("Business", UserValidationRules["Business"])
+	if !ok {
+		errorMessages = append(errorMessages, err)
+	}
+
+	ok, err = u.Password.Validate("Password", UserValidationRules["Password"])
+	if !ok {
+		errorMessages = append(errorMessages, err)
+	}
+
+	return len(errorMessages) == 0, errorMessages
 
 }
 
@@ -109,6 +127,6 @@ func (u *User) hashPassword() error {
 	if err != nil {
 		return err
 	}
-	u.Password = validator.ValidatedString(hashedPassword)
+	u.HashedPassword = string(hashedPassword)
 	return nil
 }

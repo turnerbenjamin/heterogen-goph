@@ -101,3 +101,7 @@ form.htmx-request button::after {
     flex-direction: column;
     align-items: center;
 }
+
+.modal .auth-form{
+    background-color: white;
+}

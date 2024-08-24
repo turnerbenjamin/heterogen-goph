@@ -14,7 +14,7 @@ func AuthRoutes(authController *web_app_handlers.AuthController) router.Routes {
 
 		//LOG-IN
 		router.Get("/log-in", authController.LogInPage),
-		router.Post("/log-in", authController.LogInPage),
+		router.Post("/log-in", authController.LogIn),
 	}
 
 }

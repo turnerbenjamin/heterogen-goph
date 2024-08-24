@@ -2,6 +2,7 @@ package validator
 
 import (
 	"fmt"
+	"net/mail"
 	"regexp"
 	"strings"
 )
@@ -18,6 +19,7 @@ type ValidationRules struct {
 	Pattern            *ValidationPattern
 	RequireDigit       bool
 	RequireSpecialChar bool
+	IsEmail            bool
 }
 
 func (vr *ValidationRules) HtmlAttributes() []string {
@@ -62,6 +64,13 @@ func (s ValidatedString) Validate(fieldName string, vr *ValidationRules) (bool, 
 
 	if vr.Pattern != nil && !regexp.MustCompile(vr.Pattern.RegXStr).Match([]byte(s)) {
 		return false, vr.Pattern.Message
+	}
+
+	if vr.IsEmail {
+		_, err := mail.ParseAddress(string(s))
+		if err != nil {
+			return false, "Invalid email address"
+		}
 	}
 
 	return true, ""

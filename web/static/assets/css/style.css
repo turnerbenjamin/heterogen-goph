@@ -103,6 +103,54 @@ body{
     font-weight: 400;
 }
 
+.disabled-scroll{
+    height: 100%;
+    overflow-y: hidden;
+}
+
+.modal{
+    position: fixed;
+    inset: 0;
+    background-color: rgba(255,255,255,0.8);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 10vh;
+}
+
+.modal-content{
+    position: relative;
+}
+
+.close-modal-button {
+    position: absolute;
+    right: 2px;
+    top: 2%;
+    width: 32px;
+    height: 32px;
+    z-index: 10;
+    opacity: 0.6;
+    cursor: pointer;
+  }
+  .close-modal-button:hover {
+    opacity: 1;
+  }
+  .close-modal-button:before, .close-modal-button:after {
+    position: absolute;
+    left: 15px;
+    content: ' ';
+    height: 33px;
+    width: 2px;
+    background-color: #333;
+  }
+  .close-modal-button:before {
+    transform: rotate(45deg);
+  }
+  .close-modal-button:after {
+    transform: rotate(-45deg);
+  }
+
+
 a:link,a:visited,a:hover,a:active{
     text-decoration: none;
 }
@@ -164,6 +212,25 @@ button.primary{
 
 button.primary:hover{
     background-color: var(--green-ctst);
+}
+
+.error-messages{
+    color: var(--red-ctst);
+}
+
+.error-messages ul{
+    margin: var(--ws-4) 0 var(--ws-4) var(--ws-4);
+    list-style: none;
+}
+
+.error-messages li{
+    margin-bottom: var(--ws-4);
+}
+
+.error-messages li::before{
+    content:"!";
+    color: var(--red-ctst);
+    margin-right: var(--ws-2);
 }
 
 
