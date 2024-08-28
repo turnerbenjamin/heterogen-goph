@@ -1,6 +1,6 @@
 # HeteroGen
 
-![](./web/static/assets/images/logo/hg.logo.png)
+![Heterogen Logo](./cmd/static/images/logo/hg.logo.png)
 
 ## About
 
