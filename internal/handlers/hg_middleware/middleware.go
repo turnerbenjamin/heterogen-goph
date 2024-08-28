@@ -1,5 +1,7 @@
 package hg_middleware
 
-import "net/http"
+import (
+	"github.com/turnerbenjamin/heterogen-go/internal/httpErrors"
+)
 
-type Middleware func(http.HandlerFunc) http.HandlerFunc
+type Middleware func(httpErrors.ReqHandler) httpErrors.ReqHandler

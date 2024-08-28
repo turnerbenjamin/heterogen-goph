@@ -6,12 +6,13 @@ import (
 	"strings"
 
 	"github.com/turnerbenjamin/heterogen-go/internal/db_models"
+	"github.com/turnerbenjamin/heterogen-go/internal/httpErrors"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type HgAuthService interface {
-	Create(db_models.User) (*db_models.User, string)
-	SignIn(string, string) (*db_models.User, string)
+	Create(db_models.User) (*db_models.User, error)
+	SignIn(string, string) (*db_models.User, error)
 }
 
 type authService struct {
@@ -27,7 +28,7 @@ func NewAuthService(database *sql.DB) HgAuthService {
 /*
 REGISTER A NEW USER
 */
-func (authSvc *authService) Create(usr db_models.User) (*db_models.User, string) {
+func (authSvc *authService) Create(usr db_models.User) (*db_models.User, error) {
 	baseQuery := `
 	INSERT INTO users
 	(id, email_address, first_name, last_name, business, password, permissions)
@@ -37,26 +38,24 @@ func (authSvc *authService) Create(usr db_models.User) (*db_models.User, string)
 	`
 	var newUser db_models.User
 	rows, err := authSvc.db.Query(baseQuery, usr.Id, usr.EmailAddress, usr.FirstName, usr.LastName, usr.Business, usr.HashedPassword, usr.Permissions)
+
 	if err != nil {
-		msg := "Server error"
 		if strings.Contains(err.Error(), "users_email_address_key") {
-			msg = "Email address is already associated with an account"
+			return nil, httpErrors.Make(401, []httpErrors.ErrorMessage{"Email address is already associated with an account"})
 		}
-		return &newUser, msg
+		return nil, httpErrors.ServerFail()
 	}
 
 	if rows.Next() {
 		err := rows.Scan(&newUser.Id, &newUser.EmailAddress, &newUser.FirstName, &newUser.LastName, &newUser.Business, &newUser.Permissions)
 		if err != nil {
-			msg := "Server error"
-			fmt.Println(err)
-			return &newUser, msg
+			return nil, httpErrors.ServerFail()
 		}
 	}
-	return &newUser, ""
+	return &newUser, nil
 }
 
-func (authSvc *authService) SignIn(emailAddress string, password string) (*db_models.User, string) {
+func (authSvc *authService) SignIn(emailAddress string, password string) (*db_models.User, error) {
 	baseQuery := `
 	SELECT id, email_address, password, first_name, last_name, business, permissions FROM users
 	WHERE email_address=$1
@@ -70,18 +69,17 @@ func (authSvc *authService) SignIn(emailAddress string, password string) (*db_mo
 	//Scan row to user struct
 	err := row.Scan(&user.Id, &user.EmailAddress, &user.Password, &user.FirstName, &user.LastName, &user.Business, &user.Permissions)
 	if err != nil {
-		fmt.Println(err)
-		return &user, "Email not found"
+		return nil, httpErrors.Unauthorised()
 	}
 
 	//Validate password
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 	fmt.Println(user.Password, password)
 	if err != nil {
-		return &user, "Password wrong"
+		return nil, httpErrors.Unauthorised()
 	}
 
 	user.Password = ""
 
-	return &user, ""
+	return &user, nil
 }

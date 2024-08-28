@@ -1,0 +1,29 @@
+<div class="modal">
+    <script type="text/javascript">
+        document.body.classList.add("disabled-scroll")
+    </script>
+    <div class="modal-content">
+        <div class="close-modal-button" 
+        role="button"
+        onclick="
+    document.getElementById(`modal-container`).innerHTML = ``;
+    document.body.classList.remove(`disabled-scroll`)
+    "></div>
+        <form hx-ext="response-targets" hx-post="/log-in"  hx-on:h hx-target-error="#log-in-form-error-target" hx-disable-elt class="auth-form">
+            <h2 class="form-heading">Log-In</h2>
+            <div class="field-group">
+                <div class="form-item">
+                    <label for="email_address">Email Address</label>
+                    <input type="email" placeholder="your@email.com" name="email_address" id="email_address" required />
+                </div>
+                <div class="form-item">
+                    
+                    <label for="password">Password</label>
+                    <input type="password" placeholder="password" name="password" id="password" required/>
+                </div>
+            </div>
+            <button type="submit" class="primary">Log-In</button>
+            <div id="log-in-form-error-target" class="error-messages"></div>
+        </form>
+    </div>
+</div>

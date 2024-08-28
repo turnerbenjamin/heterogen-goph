@@ -6,6 +6,6 @@ import (
 	"github.com/turnerbenjamin/heterogen-go/internal/render"
 )
 
-var HomeHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-	render.Template(w, "home.page.tmpl", nil)
-})
+var HomeHandler = func(w http.ResponseWriter, r *http.Request) error {
+	return render.Template(w, r, "home.page.go.tmpl", nil)
+}

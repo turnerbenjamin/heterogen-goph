@@ -1,7 +1,8 @@
 package render
 
 import (
-	"fmt"
+	"compress/gzip"
+	"errors"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -15,23 +16,37 @@ var templateCache = TemplateCache{}
 
 var doCache = false
 
-func Template(w http.ResponseWriter, t string, data any) {
-	parsedTemplate := getTemplate(t)
-	err := parsedTemplate.Execute(w, data)
+func Template(w http.ResponseWriter, r *http.Request, t string, data any) error {
+
+	parsedTemplate, err := getTemplate(t)
 	if err != nil {
-		fmt.Println("Error: ", err)
-		return
+		return err
 	}
+
+	if acceptsGz(r) {
+		w.Header().Add("Content-Type", "text/html")
+		w.Header().Add("Content-Encoding", "gzip")
+
+		gzw := gzip.NewWriter(w)
+		defer gzw.Close()
+		return parsedTemplate.Execute(gzw, data)
+
+	}
+	return parsedTemplate.Execute(w, data)
 }
 
-func getTemplate(t string) *template.Template {
+func acceptsGz(r *http.Request) bool {
+	return strings.Contains(r.Header.Get("Accept-Encoding"), "gzip")
+}
+
+func getTemplate(t string) (*template.Template, error) {
 	if !doCache {
 		return getTemplateFromDisk(t)
 	}
 	return getTemplateFromCache(t)
 }
 
-func getTemplateFromDisk(t string) *template.Template {
+func getTemplateFromDisk(t string) (*template.Template, error) {
 
 	filepath := "./web/views/pages/"
 	if strings.Contains(t, ".component") {
@@ -41,26 +56,23 @@ func getTemplateFromDisk(t string) *template.Template {
 	tmpl, err := template.ParseFiles(filepath + t)
 
 	if err != nil {
-		fmt.Println("Error", err)
-		os.Exit(1)
+		return nil, err
 	}
 
-	tmpl, err = tmpl.ParseGlob("./web/views/layouts/*.layout.tmpl")
+	tmpl, err = tmpl.ParseGlob("./web/views/layouts/*.layout.go.tmpl")
 	if err != nil {
-		fmt.Println("Error", err)
-		os.Exit(1)
+		return nil, err
 	}
 
-	return tmpl
+	return tmpl, nil
 }
 
-func getTemplateFromCache(t string) *template.Template {
+func getTemplateFromCache(t string) (*template.Template, error) {
 	tmpl, inMap := templateCache[t]
 	if !inMap {
-		fmt.Printf("Template (%s) not found in cache", t)
-		os.Exit(1)
+		return nil, errors.New("template not found")
 	}
-	return tmpl
+	return tmpl, nil
 
 }
 
@@ -68,12 +80,12 @@ func InitialiseTemplateCache() error {
 
 	doCache = os.Getenv("mode") == "production"
 
-	pagePaths, err := filepath.Glob("./web/views/pages/*.page.tmpl")
+	pagePaths, err := filepath.Glob("./web/views/pages/*.page.go.tmpl")
 	if err != nil {
 		return err
 	}
 
-	componentPaths, err := filepath.Glob("./web/views/components/*.component.tmpl")
+	componentPaths, err := filepath.Glob("./web/views/components/*.component.go.tmpl")
 	if err != nil {
 		return err
 	}
@@ -87,7 +99,7 @@ func InitialiseTemplateCache() error {
 			return err
 		}
 
-		tmpl, err = tmpl.ParseGlob("./web/views/layouts/*.layout.tmpl")
+		tmpl, err = tmpl.ParseGlob("./web/views/layouts/*.layout.go.tmpl")
 		if err != nil {
 			return err
 		}

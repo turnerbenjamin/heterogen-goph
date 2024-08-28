@@ -1,0 +1,295 @@
+@font-face { font-family: moderustic; font-weight: 100 200 300; src: url('/static/fonts/moderustic-light.ttf');}
+@font-face { font-family: moderustic; font-weight: 400; src: url('/static/fonts/moderustic-regular.ttf');}
+@font-face { font-family: moderustic; font-weight: 500; src: url('/static/fonts/moderustic-medium.ttf');}
+@font-face { font-family: moderustic; font-weight: 600; src: url('/static/fonts/moderustic-semi-bold.ttf');}
+@font-face { font-family: moderustic; font-weight: 700; src: url('/static/fonts/moderustic-bold.ttf');}
+@font-face { font-family: moderustic; font-weight: 800 900; src: url('/static/fonts/moderustic-extra-bold.ttf');}
+
+:root{
+
+    --blue-0:           #eceeef;
+    --blue-1:           #d8dddf;
+    --blue-2:           #b2bbbf;
+    --blue-3:           #8b999f;
+    --blue-4:           #65777f;
+    --blue-5:           #3e555f;
+    --blue-6:           #32444c;
+    --blue-ctst:        #253339;
+    --blue-8:           #131a1d;
+    --blue-9:           #0b0f11;
+    
+    --green-0:     #e7eae6;
+    --green-1:     #cfd5cc;
+    --green-2:     #9fac9a;
+    --green-3:     #708267;
+    --green-4:     #405935;
+    --green-ctst:  #102f02;
+    --green-6:     #0e2a02;
+    --green-7:     #0b2101;
+    --green-8:     #081801;
+    --green-9:     #050e01;
+
+    --yellow-0:         #fbfbef;
+    --yellow-1:         #f6f6df;
+    --yellow-2:         #eeeebf;
+    --yellow-3:         #e5e5a0;
+    --yellow-4:         #dddd80;
+    --yellow-5:         #d4d460;
+    --yellow-6:         #aaaa4d;
+    --yellow-7:         #7f7f3a;
+    --yellow-8:         #555526;
+    --yellow-ctst:      #2a2a13;
+
+    --base-0:           #f6f3f2;
+    --base-1:           #ede7e4;
+    --base-2:           #dcd0c9;
+    --base-3:           #cab8ae;
+    --base-4:           #b9a193;
+    --base-5:           #a78978;
+    --base-6:           #866e60;
+    --base-7:           #645248;
+    --base-8:           #433730;
+    --base-ctst:        #211b18;
+
+    --red-0:            #f6e8ea;
+    --red-1:            #edd1d5;
+    --red-2:            #dba4ab;
+    --red-3:            #c97682;
+    --red-4:            #b74958;
+    --red-5:            #a51b2e;
+    --red-6:            #841625;
+    --red-ctst:         #63101c;
+    --red-8:            #420b12;
+    --red-9:            #210509;
+
+
+    
+    --fs-sm:    clamp(0.8rem, 0.17vi + 0.76rem, 0.89rem);
+    --fs-base:  clamp(1rem, 0.34vi + 0.91rem, 1.19rem);
+    --fs-md:    clamp(1.25rem, 0.61vi + 1.1rem, 1.58rem);
+    --fs-lg:    clamp(1.56rem, 1vi + 1.31rem, 2.11rem);
+    --fs-xl:    clamp(1.95rem, 1.56vi + 1.56rem, 2.81rem);
+    --fs-xxl:   clamp(2.44rem, 2.38vi + 1.85rem, 3.75rem);
+    --fs-xxxl:  clamp(3.05rem, 3.54vi + 2.17rem, 5rem);
+
+    --ws-1:     0.236rem;
+    --ws-2:     0.382rem;
+    --ws-3:     0.618rem;
+    --ws-4:     1rem;
+    --ws-5:     1.618rem;
+    --ws-6:     2.618rem;
+    --ws-7:     4.236rem;
+    --ws-8:     6.854rem;
+    --ws-9:     11.089rem;
+    --ws-10:    17.942rem;
+}
+
+*{
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+html{
+    font-size:62.5%;
+    line-height: 1.15; 
+    -webkit-text-size-adjust: 100%; 
+}
+
+
+body{
+    margin: 0;
+    font-family: moderustic, sans-serif;
+    font-size: var(--fs-md);
+    color: var(--base-ctst);
+    font-weight: 400;
+}
+
+.disabled-scroll{
+    height: 100%;
+    overflow-y: hidden;
+}
+
+.modal{
+    position: fixed;
+    inset: 0;
+    background-color: rgba(255,255,255,0.8);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 10vh;
+}
+
+.modal-content{
+    position: relative;
+}
+
+.close-modal-button {
+    position: absolute;
+    right: 2px;
+    top: 2%;
+    width: 32px;
+    height: 32px;
+    z-index: 10;
+    opacity: 0.6;
+    cursor: pointer;
+  }
+
+  .close-modal-button:hover {
+    opacity: 1;
+  }
+
+  .close-modal-button:before, .close-modal-button:after {
+    position: absolute;
+    left: 15px;
+    content: ' ';
+    height: 33px;
+    width: 2px;
+    background-color: #333;
+  }
+  .close-modal-button:before {
+    transform: rotate(45deg);
+  }
+  .close-modal-button:after {
+    transform: rotate(-45deg);
+  }
+
+
+a:link,a:visited,a:hover,a:active{
+    text-decoration: none;
+}
+
+h1,h2,h3,h4,h5{
+    font-size: var(--fs-xxl);
+    color: var(--green-ctst);
+    font-weight: 300;
+    /* user-select: none; */
+}
+
+header{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--yellow-8);
+    height: 50px;
+    padding: 0 var(--ws-4);
+}
+
+
+.title{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    
+}
+
+.logo-wrapper{
+    width: 4rem;
+    aspect-ratio: 1 / 1;
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+.logo-wrapper img{
+    width: 100%;
+}
+
+button{
+    padding: 0.8rem 1.6rem;
+    cursor: pointer;
+    background-color: transparent;
+    border: 1px solid var(--green-8);
+    font-size: var(--fs-md);
+    letter-spacing: var(--ws-1);
+    user-select: none;
+}
+
+button:hover{
+    background-color: var(--base-0);
+}
+
+button.primary{
+    background-color: var(--green-7);
+    color: var(--base-0);
+}
+
+button.primary:hover{
+    background-color: var(--green-ctst);
+}
+
+.error-messages{
+    color: var(--red-ctst);
+}
+
+.error-messages ul{
+    margin: var(--ws-4) 0 var(--ws-4) var(--ws-4);
+    list-style: none;
+}
+
+.error-messages li{
+    margin-bottom: var(--ws-4);
+}
+
+.error-messages li::before{
+    content:"!";
+    color: var(--red-ctst);
+    margin-right: var(--ws-2);
+}
+
+.hero-section{
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+    height: calc(100vh - 50px);
+}
+.hero-content{
+    position: relative;
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+    gap: 2rem;
+}
+
+.hero-section .tagline{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-around;
+}
+
+.hero-section .tagline h2{
+    font-weight: 100;
+    color: var(--green-4);
+}
+
+.hero-section .tagline h2:first-child,
+.hero-section .tagline h2:last-child
+{
+    color: var(--green-ctst);
+    font-size: var(--fs-xxxl);
+}
+
+.hero-img-wrapper{
+    border-radius: 100%;
+    overflow: hidden;
+    width: 30vw;
+    max-width: 30rem;
+    aspect-ratio: 1/1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 4px 4px 2px 0 rgba(0,0,0,0.1);
+}
+
+.hero-img-wrapper img{
+    max-height: 100%;
+}
+
+
+
+
+
+

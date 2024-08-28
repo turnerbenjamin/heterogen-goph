@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/lib/pq"
+	"github.com/turnerbenjamin/heterogen-go/internal/httpErrors"
 	"github.com/turnerbenjamin/heterogen-go/internal/uuid"
 	"github.com/turnerbenjamin/heterogen-go/internal/validator"
 	"golang.org/x/crypto/bcrypt"
@@ -79,32 +80,32 @@ func UserFromForm(r *http.Request) (User, error) {
 	return user, err
 }
 
-func (u *User) Validate() (bool, []string) {
-	errorMessages := []string{}
+func (u *User) Validate() (bool, []httpErrors.ErrorMessage) {
+	errorMessages := []httpErrors.ErrorMessage{}
 
 	ok, err := u.EmailAddress.Validate("EmailAddress", UserValidationRules["EmailAddress"])
 	if !ok {
-		errorMessages = append(errorMessages, err)
+		errorMessages = append(errorMessages, httpErrors.ErrorMessage(err))
 	}
 
 	ok, err = u.FirstName.Validate("FirstName", UserValidationRules["FirstName"])
 	if !ok {
-		errorMessages = append(errorMessages, err)
+		errorMessages = append(errorMessages, httpErrors.ErrorMessage(err))
 	}
 
 	ok, err = u.LastName.Validate("LastName", UserValidationRules["LastName"])
 	if !ok {
-		errorMessages = append(errorMessages, err)
+		errorMessages = append(errorMessages, httpErrors.ErrorMessage(err))
 	}
 
 	ok, err = u.Business.Validate("Business", UserValidationRules["Business"])
 	if !ok {
-		errorMessages = append(errorMessages, err)
+		errorMessages = append(errorMessages, httpErrors.ErrorMessage(err))
 	}
 
 	ok, err = u.Password.Validate("Password", UserValidationRules["Password"])
 	if !ok {
-		errorMessages = append(errorMessages, err)
+		errorMessages = append(errorMessages, httpErrors.ErrorMessage(err))
 	}
 
 	return len(errorMessages) == 0, errorMessages

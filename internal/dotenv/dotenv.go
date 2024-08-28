@@ -26,6 +26,9 @@ func Load() {
 	for scanner.Scan() {
 		kv := scanner.Text()
 		separator := strings.Index(kv, "=")
+		if separator < 0 {
+			continue
+		}
 		key := kv[:separator]
 		value := kv[separator+1:]
 		os.Setenv(key, value)
