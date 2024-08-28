@@ -7,6 +7,7 @@
 
 *.test
 *.out
+out
 
 go.work
 go.work.sum

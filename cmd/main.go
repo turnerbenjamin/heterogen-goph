@@ -2,51 +2,74 @@ package main
 
 import (
 	"fmt"
+	"io/fs"
 	"log"
 	"net/http"
 	"os"
+	"reflect"
 
 	staticAssets "github.com/turnerbenjamin/heterogen-go/cmd/static"
+	"github.com/turnerbenjamin/heterogen-go/cmd/templates"
 	"github.com/turnerbenjamin/heterogen-go/internal/database"
 	"github.com/turnerbenjamin/heterogen-go/internal/dotenv"
-	"github.com/turnerbenjamin/heterogen-go/internal/handlers/hg_middleware"
-	"github.com/turnerbenjamin/heterogen-go/internal/handlers/web_app_handlers"
+	"github.com/turnerbenjamin/heterogen-go/internal/handlers/htmlHandler"
+	"github.com/turnerbenjamin/heterogen-go/internal/handlers/middleware"
+	"github.com/turnerbenjamin/heterogen-go/internal/helpers"
 	"github.com/turnerbenjamin/heterogen-go/internal/hg_services"
 	"github.com/turnerbenjamin/heterogen-go/internal/render"
 	"github.com/turnerbenjamin/heterogen-go/internal/router"
-	"github.com/turnerbenjamin/heterogen-go/internal/router/routers"
+	"github.com/vearutop/statigz"
 )
 
 func main() {
 	dotenv.Load()
+	mode := helpers.NewMode(os.Getenv("mode"))
+	fmt.Printf("Starting Server in %s mode\n", mode)
 	staticAssets.CompressFiles()
 
-	err := render.InitialiseTemplateCache()
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+	staticFileServer := helpers.SelectValueByMode(mode, helpers.ValueSelector[http.Handler]{
+		Development: http.FileServer(http.Dir("./cmd/static/")),
+		Production:  statigz.FileServer(staticAssets.FileSystem),
+	})
+
+	fmt.Println(reflect.TypeOf(staticFileServer))
+
+	//*Template config
+	templateDirPaths := render.TemplateDirPaths{
+		Layouts:    render.TemplateDirPath{Path: "layouts/", FileSuffix: ".layout.go.tmpl"},
+		Pages:      render.TemplateDirPath{Path: "pages/", FileSuffix: ".page.go.tmpl"},
+		Components: render.TemplateDirPath{Path: "components/", FileSuffix: ".component.go.tmpl"},
 	}
 
+	templateFs := helpers.SelectValueByMode(mode, helpers.ValueSelector[fs.ReadDirFS]{
+		Development: helpers.GetDirFs("./cmd/templates"),
+		Production:  templates.FileSystem,
+	})
+
+	doCache := mode != "development"
+	if err := render.InitialiseTemplateCache(templateFs, templateDirPaths, doCache); err != nil {
+		log.Fatal(err)
+	}
+
+	//*DB
 	db := database.GetDB()
 	defer db.Close()
 
-	//Middlewares
-	router.Use(hg_middleware.Logger)
-	router.Use(hg_middleware.PrintUserId)
+	//*Middlewares
+	router.Use(middleware.Logger)
+	router.Use(middleware.PrintUserId)
 
-	//Services
+	//*Services
 	authService := hg_services.NewAuthService(db)
 
-	//Controllers
-	authController := web_app_handlers.NewAuthController(authService)
+	//*Handlers
+	authHandler := htmlHandler.NewAuthHandler(authService)
 
-	//routes
+	//*routes
 	routes := router.Routes{}
-	routes = append(routes, routers.Home()...)
-	routes = append(routes, routers.AuthRoutes(authController)...)
-
-	mux := router.GetMux(routes)
+	routes = append(routes, router.Home()...)
+	routes = append(routes, router.AuthRoutes(authHandler)...)
+	mux := router.GetMux(routes, staticFileServer)
 
 	log.Fatal(http.ListenAndServe(":8080", mux))
-
 }

@@ -163,7 +163,7 @@ h1,h2,h3,h4,h5{
     font-size: var(--fs-xxl);
     color: var(--green-ctst);
     font-weight: 300;
-    /* user-select: none; */
+    user-select: none;
 }
 
 header{

@@ -5,17 +5,18 @@ import (
 	"embed"
 	"fmt"
 	"io"
-	"io/fs"
 	"log"
 	"os"
 	"strings"
+
+	"github.com/turnerbenjamin/heterogen-go/internal/helpers"
 )
 
 //go:embed *
 var FileSystem embed.FS
 
 func CompressFiles() {
-	files, err := getAllFilenames(&FileSystem)
+	files, err := helpers.GetFilesFromDir(&FileSystem)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -76,20 +77,6 @@ func compressFile(srcPath string, destinationPath string) {
 	}
 
 	gzipWriter.Flush()
-}
-
-func getAllFilenames(efs *embed.FS) (files []string, err error) {
-	if err := fs.WalkDir(efs, ".", func(path string, d fs.DirEntry, err error) error {
-		if d.IsDir() {
-			return nil
-		}
-		files = append(files, path)
-		return nil
-	}); err != nil {
-		return nil, err
-	}
-
-	return files, nil
 }
 
 func isExcludedType(path string) bool {

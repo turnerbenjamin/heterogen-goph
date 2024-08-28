@@ -3,16 +3,33 @@ package render
 import (
 	"compress/gzip"
 	"errors"
+	"fmt"
+	"io/fs"
+	"log"
 	"net/http"
-	"os"
 	"path/filepath"
 	"strings"
 	"text/template"
+
+	"github.com/turnerbenjamin/heterogen-go/internal/helpers"
 )
 
 type TemplateCache = map[string]*template.Template
 
 var templateCache = TemplateCache{}
+
+type TemplateDirPath struct {
+	Path       string
+	FileSuffix string
+}
+type TemplateDirPaths struct {
+	Layouts    TemplateDirPath
+	Pages      TemplateDirPath
+	Components TemplateDirPath
+}
+
+var directory fs.ReadDirFS
+var dirPaths TemplateDirPaths
 
 var doCache = false
 
@@ -48,18 +65,21 @@ func getTemplate(t string) (*template.Template, error) {
 
 func getTemplateFromDisk(t string) (*template.Template, error) {
 
-	filepath := "./web/views/pages/"
-	if strings.Contains(t, ".component") {
-		filepath = "./web/views/components/"
+	var tp TemplateDirPath
+	if strings.HasSuffix(t, dirPaths.Pages.FileSuffix) {
+		tp = dirPaths.Pages
+	} else if strings.HasSuffix(t, dirPaths.Components.FileSuffix) {
+		tp = dirPaths.Components
+	} else {
+		log.Fatalf("template name (%s) must end in %s or %s ", t, dirPaths.Pages.FileSuffix, dirPaths.Components.FileSuffix)
 	}
 
-	tmpl, err := template.ParseFiles(filepath + t)
-
+	tmpl, err := template.ParseFS(directory, tp.addSuffix(t))
 	if err != nil {
 		return nil, err
 	}
 
-	tmpl, err = tmpl.ParseGlob("./web/views/layouts/*.layout.go.tmpl")
+	tmpl, err = tmpl.ParseFS(directory, dirPaths.Layouts.allFilesGlob())
 	if err != nil {
 		return nil, err
 	}
@@ -76,30 +96,23 @@ func getTemplateFromCache(t string) (*template.Template, error) {
 
 }
 
-func InitialiseTemplateCache() error {
+func InitialiseTemplateCache(templateDir fs.ReadDirFS, templateDirPaths TemplateDirPaths, doCache bool) error {
+	directory = templateDir
+	dirPaths = templateDirPaths
 
-	doCache = os.Getenv("mode") == "production"
-
-	pagePaths, err := filepath.Glob("./web/views/pages/*.page.go.tmpl")
+	paths, err := helpers.GetFilesFromDir(templateDir)
 	if err != nil {
 		return err
 	}
-
-	componentPaths, err := filepath.Glob("./web/views/components/*.component.go.tmpl")
-	if err != nil {
-		return err
-	}
-
-	paths := append(pagePaths, componentPaths...)
 
 	for _, path := range paths {
 		name := filepath.Base(path)
-		tmpl, err := template.New(name).ParseFiles(path)
+		tmpl, err := template.New(name).ParseFS(directory, path)
 		if err != nil {
 			return err
 		}
 
-		tmpl, err = tmpl.ParseGlob("./web/views/layouts/*.layout.go.tmpl")
+		tmpl, err = tmpl.ParseFS(directory, dirPaths.Layouts.allFilesGlob())
 		if err != nil {
 			return err
 		}
@@ -107,4 +120,12 @@ func InitialiseTemplateCache() error {
 		templateCache[name] = tmpl
 	}
 	return nil
+}
+
+func (tp *TemplateDirPath) addSuffix(sx string) string {
+	return fmt.Sprintf("%s%s", tp.Path, sx)
+}
+
+func (tp *TemplateDirPath) allFilesGlob() string {
+	return fmt.Sprintf("%s*%s", tp.Path, tp.FileSuffix)
 }

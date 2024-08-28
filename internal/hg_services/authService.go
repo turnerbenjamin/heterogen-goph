@@ -5,14 +5,14 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/turnerbenjamin/heterogen-go/internal/db_models"
 	"github.com/turnerbenjamin/heterogen-go/internal/httpErrors"
+	"github.com/turnerbenjamin/heterogen-go/internal/models"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type HgAuthService interface {
-	Create(db_models.User) (*db_models.User, error)
-	SignIn(string, string) (*db_models.User, error)
+	Create(models.User) (*models.User, error)
+	SignIn(string, string) (*models.User, error)
 }
 
 type authService struct {
@@ -28,7 +28,7 @@ func NewAuthService(database *sql.DB) HgAuthService {
 /*
 REGISTER A NEW USER
 */
-func (authSvc *authService) Create(usr db_models.User) (*db_models.User, error) {
+func (authSvc *authService) Create(usr models.User) (*models.User, error) {
 	baseQuery := `
 	INSERT INTO users
 	(id, email_address, first_name, last_name, business, password, permissions)
@@ -36,7 +36,7 @@ func (authSvc *authService) Create(usr db_models.User) (*db_models.User, error) 
 	RETURNING id, email_address, first_name, last_name, business, permissions
 	;
 	`
-	var newUser db_models.User
+	var newUser models.User
 	rows, err := authSvc.db.Query(baseQuery, usr.Id, usr.EmailAddress, usr.FirstName, usr.LastName, usr.Business, usr.HashedPassword, usr.Permissions)
 
 	if err != nil {
@@ -55,7 +55,7 @@ func (authSvc *authService) Create(usr db_models.User) (*db_models.User, error) 
 	return &newUser, nil
 }
 
-func (authSvc *authService) SignIn(emailAddress string, password string) (*db_models.User, error) {
+func (authSvc *authService) SignIn(emailAddress string, password string) (*models.User, error) {
 	baseQuery := `
 	SELECT id, email_address, password, first_name, last_name, business, permissions FROM users
 	WHERE email_address=$1
@@ -63,7 +63,7 @@ func (authSvc *authService) SignIn(emailAddress string, password string) (*db_mo
 	`
 
 	//Select user
-	var user db_models.User
+	var user models.User
 	row := authSvc.db.QueryRow(baseQuery, emailAddress)
 
 	//Scan row to user struct
