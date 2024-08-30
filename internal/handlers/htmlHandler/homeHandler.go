@@ -8,5 +8,5 @@ import (
 )
 
 var HomeHandler = func(w http.ResponseWriter, r *http.Request, m *models.ResponseModal) error {
-	return render.Template(w, r, "home.page.go.tmpl", nil)
+	return render.Page(w, r, "home", m, http.StatusOK)
 }

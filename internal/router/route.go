@@ -45,7 +45,7 @@ func createRoute(method httpMethods.HttpMethod, endpoint string, handler ReqHand
 	return Route{
 		Method:   method,
 		Endpoint: endpoint,
-		Handler:  Make(chain(handler, middlewares)),
+		Handler:  Handle(chain(handler, middlewares)),
 	}
 }
 

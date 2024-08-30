@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/turnerbenjamin/heterogen-go/internal/cookies"
@@ -9,15 +8,12 @@ import (
 	"github.com/turnerbenjamin/heterogen-go/internal/router"
 )
 
-var PrintUserId router.Middleware = func(next router.ReqHandler) router.ReqHandler {
+var ParseAuthCookie router.Middleware = func(next router.ReqHandler) router.ReqHandler {
 	return func(w http.ResponseWriter, r *http.Request, m *models.ResponseModal) error {
-		userId, ok := cookies.ParseAuthCookie(r)
-		if !ok {
-			next(w, r, m)
-			return nil
+		if userId, ok := cookies.ParseAuthCookie(r); ok {
+			m.UserId = userId
+			m.IsLoggedIn = true
 		}
-
-		fmt.Println(userId)
 		return next(w, r, m)
 	}
 }

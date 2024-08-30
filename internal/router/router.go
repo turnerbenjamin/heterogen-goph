@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
+	"github.com/turnerbenjamin/heterogen-go/internal/helpers"
 	"github.com/turnerbenjamin/heterogen-go/internal/httpErrors"
 	"github.com/turnerbenjamin/heterogen-go/internal/models"
 	"github.com/turnerbenjamin/heterogen-go/internal/render"
@@ -34,24 +36,31 @@ func GetMux(routes Routes, staticFileServer http.Handler) *http.ServeMux {
 	return router.Mux
 }
 
-func Make(reqHandler ReqHandler) http.HandlerFunc {
+func Handle(reqHandler ReqHandler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		m := models.ResponseModal{}
+
+		m := models.ResponseModal{
+			IsProduction: os.Getenv("mode") == string(helpers.Production),
+		}
 		err := reqHandler(w, r, &m)
 		if err == nil {
 			return
 		}
 
+		log.Println("ERROR: ", err.Error())
 		httpError, ok := err.(httpErrors.HttpError)
 		if !ok {
 			httpError = httpErrors.ServerFail()
 		}
-		log.Print(err)
 
-		errorModal := map[string][]httpErrors.ErrorMessage{"Errors": httpError.Msgs}
+		m.Errors = httpError.Msgs
 
-		if err = render.Template(w, r, "errorMessage.component.go.tmpl", errorModal); err != nil {
-			http.Error(w, "Server error", http.StatusInternalServerError)
+		w.Header().Set("Status", string(httpError.StatusCode))
+		if err = render.Component(w, r, "errorMessageList", m, httpError.StatusCode); err == nil {
+
+			return
 		}
+
+		http.Error(w, "Server error", 500)
 	}
 }

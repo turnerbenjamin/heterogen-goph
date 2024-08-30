@@ -46,6 +46,8 @@ func main() {
 		Production:  templates.FileSystem,
 	})
 
+	log.Println(templateFs)
+
 	doCache := mode != "development"
 	if err := render.InitialiseTemplateCache(templateFs, templateDirPaths, doCache); err != nil {
 		log.Fatal(err)
@@ -57,12 +59,11 @@ func main() {
 
 	//*Middlewares
 	router.Use(middleware.Logger)
-	router.Use(middleware.PrintUserId)
+	router.Use(middleware.ParseAuthCookie)
 
 	//*Services
 	authService := hg_services.NewAuthService(db)
 
-	//*Handlers
 	authHandler := htmlHandler.NewAuthHandler(authService)
 
 	//*routes

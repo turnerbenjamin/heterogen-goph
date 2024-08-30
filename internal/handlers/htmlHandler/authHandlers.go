@@ -25,7 +25,7 @@ func NewAuthHandler(s hg_services.HgAuthService) *AuthHandler {
 // Returns registration page
 func (ac *AuthHandler) RegistrationPage(w http.ResponseWriter, r *http.Request, m *models.ResponseModal) error {
 	validators := models.UserValidationHTMLAttributes()
-	render.Template(w, r, "registration.page.go.tmpl", validators)
+	render.Page(w, r, "registration", validators, 200)
 	return nil
 }
 
@@ -46,7 +46,7 @@ func (ac *AuthHandler) Register(w http.ResponseWriter, r *http.Request, m *model
 		return err
 	}
 
-	render.Template(w, r, "successMessage.component.go.tmpl", "<p>Account created successfully. <a href=\"log-in\">Log-in</a></p>")
+	render.Component(w, r, "successMessage", "<p>Account created successfully. <a href=\"log-in\">Log-in</a></p>", http.StatusOK)
 	return nil
 }
 
@@ -54,7 +54,7 @@ func (ac *AuthHandler) Register(w http.ResponseWriter, r *http.Request, m *model
 
 // Returns the log in modal
 func (ac *AuthHandler) LogInPage(w http.ResponseWriter, r *http.Request, m *models.ResponseModal) error {
-	render.Template(w, r, "logInForm.component.go.tmpl", nil)
+	render.Component(w, r, "logInForm", nil, http.StatusOK)
 	return nil
 }
 
@@ -83,6 +83,7 @@ func (ac *AuthHandler) LogIn(w http.ResponseWriter, r *http.Request, m *models.R
 // Returns the log in modal
 func (ac *AuthHandler) LogOut(w http.ResponseWriter, r *http.Request, m *models.ResponseModal) error {
 	http.SetCookie(w, cookies.UnsetAuthCookie())
-	w.Header().Set("HX-Refresh", "true")
-	return nil
+	m.ToastMessage = "Logged out"
+	m.IsLoggedIn = false
+	return render.Page(w, r, "home", m, http.StatusOK)
 }

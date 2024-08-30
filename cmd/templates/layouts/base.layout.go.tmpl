@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="/static/js/htmx.min.js" defer></script>
     <script src="/static/js/htmx-response-targets.js" defer></script>
+    <script src="/static/js/script.js" defer></script>
+    {{if not .IsProduction}}
     <!-- RELOAD ON FOCUS - DEV HELPER -->
     <script>
         const reload = ()=>{
@@ -19,9 +21,9 @@
         window.addEventListener("load", onLoad)
     </script>
     <!-- END-->
+     {{end}}
 
     <link rel="stylesheet" href="/static/css/style.css">
-    <link rel="stylesheet" href="/static/css/form.css">
     {{block "cssImports" .}}
     {{end}}
     {{block "js" .}}
@@ -32,17 +34,23 @@
     </title>
 </head>
 
-<body>
+<body hx-on::after-settle="updateToast()">
     <header>
         <a class="title" href="/">
         <div class="logo-wrapper">
             <img src="/static/images/logo/hg.logo.png" alt="logo"/>
         </div>
-            <h1>HeteroGen</h1>
+            <h1>Heterogen</h1>
     </a>
     <nav>
-        <a href="/register"><button class="primary">Register</button></a>
-        <button hx-get="/log-in" hx-target="#modal-container">Log-In</button>
+        {{if .IsLoggedIn }}
+            <button hx-post="/log-out" hx-ext="response-targets" hx-target="body" hx-post="/register" hx-target-error="#toast-message" hx-on::after-request="updateToast()">Log-Out</button>
+        {{else }}
+            <a href="/register"><button class="primary">Register</button></a>
+            <button hx-get="/log-in" hx-target="#modal-container">Log-In</button>
+     
+        
+        {{end}}
     </nav>
     </header>
 
@@ -50,7 +58,11 @@
     {{end}}
 
     <div id="modal-container"></div>  
-    <div id="toast"></div>  
+    <div id="toast-container">
+        {{template "toast" .}}
+        {{block "toast-content" .}}
+        {{end}}
+    </div>  
 </body>
 
 </html>

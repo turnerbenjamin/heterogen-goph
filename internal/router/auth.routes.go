@@ -12,6 +12,9 @@ func AuthRoutes(authHandler *htmlHandler.AuthHandler) Routes {
 		//LOG-IN
 		Get("/log-in", authHandler.LogInPage),
 		Post("/log-in", authHandler.LogIn),
+
+		//LOG-OUT
+		Post("/log-out", authHandler.LogOut),
 	}
 
 }

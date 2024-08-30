@@ -2,21 +2,15 @@ package render
 
 import (
 	"compress/gzip"
-	"errors"
 	"fmt"
 	"io/fs"
 	"log"
 	"net/http"
-	"path/filepath"
 	"strings"
 	"text/template"
 
-	"github.com/turnerbenjamin/heterogen-go/internal/helpers"
+	"github.com/turnerbenjamin/heterogen-go/internal/httpErrors"
 )
-
-type TemplateCache = map[string]*template.Template
-
-var templateCache = TemplateCache{}
 
 type TemplateDirPath struct {
 	Path       string
@@ -28,98 +22,110 @@ type TemplateDirPaths struct {
 	Components TemplateDirPath
 }
 
+var useCache bool
+
+var templateCache *template.Template
+
 var directory fs.ReadDirFS
 var dirPaths TemplateDirPaths
 
-var doCache = false
+func Page(w http.ResponseWriter, r *http.Request, t string, m any, sc httpErrors.StatusCode) error {
+	tmpl := getTemplates(t, dirPaths.Pages)
+	return render(w, r, tmpl, m, sc)
+}
 
-func Template(w http.ResponseWriter, r *http.Request, t string, data any) error {
+func Component(w http.ResponseWriter, r *http.Request, t string, m any, sc httpErrors.StatusCode) error {
+	tmpl := getTemplates(t, dirPaths.Components)
+	return render(w, r, tmpl, m, sc)
+}
 
-	parsedTemplate, err := getTemplate(t)
-	if err != nil {
-		return err
-	}
+func render(w http.ResponseWriter, r *http.Request, t *template.Template, m any, sc httpErrors.StatusCode) error {
+
+	w.Header().Add("Content-Type", "text/html")
 
 	if acceptsGz(r) {
-		w.Header().Add("Content-Type", "text/html")
 		w.Header().Add("Content-Encoding", "gzip")
-
 		gzw := gzip.NewWriter(w)
 		defer gzw.Close()
-		return parsedTemplate.Execute(gzw, data)
-
+		w.WriteHeader(int(sc))
+		return t.Execute(gzw, m)
 	}
-	return parsedTemplate.Execute(w, data)
+
+	w.WriteHeader(int(sc))
+	return t.Execute(w, m)
+}
+
+func getTemplates(t string, p TemplateDirPath) *template.Template {
+	if useCache {
+		log.Println("TODO: FIX CACHING")
+		tmpl, err := getTemplateFromDisk(t, p)
+		if err != nil {
+			log.Fatal(err)
+		}
+		return tmpl
+		// return templateCache
+	} else {
+		tmpl, err := getTemplateFromDisk(t, p)
+		if err != nil {
+			log.Fatal(err)
+		}
+		return tmpl
+	}
 }
 
 func acceptsGz(r *http.Request) bool {
 	return strings.Contains(r.Header.Get("Accept-Encoding"), "gzip")
 }
 
-func getTemplate(t string) (*template.Template, error) {
-	if !doCache {
-		return getTemplateFromDisk(t)
+func getTemplateFromDisk(t string, p TemplateDirPath) (*template.Template, error) {
+	tp := p.Path + t + p.FileSuffix
+	filesToParse := []string{tp}
+
+	if p == dirPaths.Pages {
+		filesToParse = append(filesToParse, dirPaths.Layouts.allFilesGlob(), dirPaths.Components.allFilesGlob())
 	}
-	return getTemplateFromCache(t)
-}
-
-func getTemplateFromDisk(t string) (*template.Template, error) {
-
-	var tp TemplateDirPath
-	if strings.HasSuffix(t, dirPaths.Pages.FileSuffix) {
-		tp = dirPaths.Pages
-	} else if strings.HasSuffix(t, dirPaths.Components.FileSuffix) {
-		tp = dirPaths.Components
-	} else {
-		log.Fatalf("template name (%s) must end in %s or %s ", t, dirPaths.Pages.FileSuffix, dirPaths.Components.FileSuffix)
-	}
-
-	tmpl, err := template.ParseFS(directory, tp.addSuffix(t))
-	if err != nil {
-		return nil, err
-	}
-
-	tmpl, err = tmpl.ParseFS(directory, dirPaths.Layouts.allFilesGlob())
-	if err != nil {
-		return nil, err
-	}
-
-	return tmpl, nil
-}
-
-func getTemplateFromCache(t string) (*template.Template, error) {
-	tmpl, inMap := templateCache[t]
-	if !inMap {
-		return nil, errors.New("template not found")
-	}
-	return tmpl, nil
-
+	return template.ParseFS(directory, filesToParse...)
 }
 
 func InitialiseTemplateCache(templateDir fs.ReadDirFS, templateDirPaths TemplateDirPaths, doCache bool) error {
+	useCache = doCache
 	directory = templateDir
 	dirPaths = templateDirPaths
 
-	paths, err := helpers.GetFilesFromDir(templateDir)
-	if err != nil {
-		return err
-	}
+	templateCache = template.Must(
+		template.ParseFS(templateDir,
+			templateDirPaths.Layouts.allFilesGlob(),
+			templateDirPaths.Pages.allFilesGlob(),
+			templateDirPaths.Components.allFilesGlob()))
 
-	for _, path := range paths {
-		name := filepath.Base(path)
-		tmpl, err := template.New(name).ParseFS(directory, path)
-		if err != nil {
-			return err
-		}
-
-		tmpl, err = tmpl.ParseFS(directory, dirPaths.Layouts.allFilesGlob())
-		if err != nil {
-			return err
-		}
-
-		templateCache[name] = tmpl
-	}
 	return nil
+	// dirPaths = templateDirPaths
+
+	// paths, err := helpers.GetFilesFromDir(templateDir)
+	// if err != nil {
+	// 	return err
+	// }
+
+	// for _, path := range paths {
+	// 	name := filepath.Base(path)
+	// 	tmpl, err := template.New(name).ParseFS(directory, path)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+
+	// 	tmpl, err = tmpl.ParseFS(directory, dirPaths.Layouts.allFilesGlob())
+	// 	if err != nil {
+	// 		return err
+	// 	}
+
+	// 	tmpl, err = tmpl.ParseFS(directory, dirPaths.Components.allFilesGlob())
+	// 	if err != nil {
+	// 		return err
+	// 	}
+
+	// 	templateCache[name] = tmpl
+	// }
+	// return nil
 }
 
 func (tp *TemplateDirPath) addSuffix(sx string) string {
