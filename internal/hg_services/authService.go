@@ -2,7 +2,6 @@ package hg_services
 
 import (
 	"database/sql"
-	"fmt"
 	"strings"
 
 	"github.com/turnerbenjamin/heterogen-go/internal/httpErrors"
@@ -13,6 +12,7 @@ import (
 type HgAuthService interface {
 	Create(models.User) (*models.User, error)
 	SignIn(string, string) (*models.User, error)
+	GetById(string) (*models.User, error)
 }
 
 type authService struct {
@@ -74,7 +74,27 @@ func (authSvc *authService) SignIn(emailAddress string, password string) (*model
 
 	//Validate password
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
-	fmt.Println(user.Password, password)
+	if err != nil {
+		return nil, httpErrors.Unauthorised()
+	}
+
+	user.Password = ""
+
+	return &user, nil
+}
+
+func (authSvc *authService) GetById(id string) (*models.User, error) {
+	baseQuery := `
+	SELECT id, email_address, password, first_name, last_name, business, permissions FROM users
+	WHERE id=$1
+	;
+	`
+	//Select user
+	var user models.User
+	row := authSvc.db.QueryRow(baseQuery, id)
+
+	//Scan row to user struct
+	err := row.Scan(&user.Id, &user.EmailAddress, &user.Password, &user.FirstName, &user.LastName, &user.Business, &user.Permissions)
 	if err != nil {
 		return nil, httpErrors.Unauthorised()
 	}

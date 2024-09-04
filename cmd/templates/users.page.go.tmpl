@@ -1,0 +1,15 @@
+{{template "dashboard.layout" .}}
+
+
+{{define "title"}}
+HeteroGen - Dashboard
+{{end}}
+
+{{define "dashboardJs"}}
+<script src="/static/js/table.js" defer></script>
+{{end}}
+
+{{define "dashboard-content"}}
+<div id="table-container" class="table-container" hx-get="/users/table" hx-trigger="refresh-table" hx-vals="js:{config: getTableConfig()}" hx-swap="innerHTML" hx-target="this" hx-on::after-request="handleTableRefresh()">
+</div>
+{{end}}

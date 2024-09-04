@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"reflect"
 
 	staticAssets "github.com/turnerbenjamin/heterogen-go/cmd/static"
 	"github.com/turnerbenjamin/heterogen-go/cmd/templates"
@@ -17,6 +16,7 @@ import (
 	"github.com/turnerbenjamin/heterogen-go/internal/helpers"
 	"github.com/turnerbenjamin/heterogen-go/internal/hg_services"
 	"github.com/turnerbenjamin/heterogen-go/internal/render"
+	"github.com/turnerbenjamin/heterogen-go/internal/routeMapping"
 	"github.com/turnerbenjamin/heterogen-go/internal/router"
 	"github.com/vearutop/statigz"
 )
@@ -32,13 +32,9 @@ func main() {
 		Production:  statigz.FileServer(staticAssets.FileSystem),
 	})
 
-	fmt.Println(reflect.TypeOf(staticFileServer))
-
 	//*Template config
-	templateDirPaths := render.TemplateDirPaths{
-		Layouts:    render.TemplateDirPath{Path: "layouts/", FileSuffix: ".layout.go.tmpl"},
-		Pages:      render.TemplateDirPath{Path: "pages/", FileSuffix: ".page.go.tmpl"},
-		Components: render.TemplateDirPath{Path: "components/", FileSuffix: ".component.go.tmpl"},
+	templateDirConfig := render.TemplateConfig{
+		FileSuffix: ".go.tmpl",
 	}
 
 	templateFs := helpers.SelectValueByMode(mode, helpers.ValueSelector[fs.ReadDirFS]{
@@ -46,10 +42,8 @@ func main() {
 		Production:  templates.FileSystem,
 	})
 
-	log.Println(templateFs)
-
 	doCache := mode != "development"
-	if err := render.InitialiseTemplateCache(templateFs, templateDirPaths, doCache); err != nil {
+	if err := render.InitialiseTemplateStore(templateFs, templateDirConfig, doCache); err != nil {
 		log.Fatal(err)
 	}
 
@@ -57,20 +51,21 @@ func main() {
 	db := database.GetDB()
 	defer db.Close()
 
-	//*Middlewares
-	router.Use(middleware.Logger)
-	router.Use(middleware.ParseAuthCookie)
-
 	//*Services
 	authService := hg_services.NewAuthService(db)
+	userService := hg_services.NewUsersService(db)
 
+	//*Handlers
 	authHandler := htmlHandler.NewAuthHandler(authService)
+	userHandler := htmlHandler.NewUsersHandler(userService)
+
+	//*Middlewares
+	router.Use(middleware.Logger)
+	router.Use(middleware.GetUserAuthenticator(authService))
 
 	//*routes
-	routes := router.Routes{}
-	routes = append(routes, router.Home()...)
-	routes = append(routes, router.AuthRoutes(authHandler)...)
-	mux := router.GetMux(routes, staticFileServer)
+	routeMapping := routeMapping.Get(authHandler, userHandler)
+	mux := router.GetMux(routeMapping, staticFileServer)
 
 	log.Fatal(http.ListenAndServe(":8080", mux))
 }

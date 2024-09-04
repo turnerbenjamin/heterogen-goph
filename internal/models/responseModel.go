@@ -1,11 +1,20 @@
 package models
 
-import "github.com/turnerbenjamin/heterogen-go/internal/httpErrors"
+import (
+	"github.com/turnerbenjamin/heterogen-go/internal/httpErrors"
+)
 
-type ResponseModal struct {
+type Reports struct {
+	Users UserTableData
+}
+
+type ResponseModel struct {
 	IsProduction bool
+	Location     string
 	IsLoggedIn   bool
-	UserId       string
 	Errors       []httpErrors.ErrorMessage
 	ToastMessage string
+	User         *User
+	Validators   map[string][]string
+	Reports
 }

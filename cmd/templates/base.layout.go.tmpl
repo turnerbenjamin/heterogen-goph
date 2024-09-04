@@ -1,28 +1,11 @@
-{{define "base"}}
+{{define "base.layout"}}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="/static/js/htmx.min.js" defer></script>
-    <script src="/static/js/htmx-response-targets.js" defer></script>
     <script src="/static/js/script.js" defer></script>
-    {{if not .IsProduction}}
-    <!-- RELOAD ON FOCUS - DEV HELPER -->
-    <script>
-        const reload = ()=>{
-                location.reload()
-                window.removeEventListener("focus", reload)
-            }
-        const onLoad = ()=> {
-            window.addEventListener("focus", reload)
-            window.removeEventListener("load", onLoad)
-        }
-        window.addEventListener("load", onLoad)
-    </script>
-    <!-- END-->
-     {{end}}
-
     <link rel="stylesheet" href="/static/css/style.css">
     {{block "cssImports" .}}
     {{end}}
@@ -34,7 +17,7 @@
     </title>
 </head>
 
-<body hx-on::after-settle="updateToast()">
+<body>
     <header>
         <a class="title" href="/">
         <div class="logo-wrapper">
@@ -42,24 +25,31 @@
         </div>
             <h1>Heterogen</h1>
     </a>
-    <nav>
+    <nav id="top-level-nav">
         {{if .IsLoggedIn }}
-            <button hx-post="/log-out" hx-ext="response-targets" hx-target="body" hx-post="/register" hx-target-error="#toast-message" hx-on::after-request="updateToast()">Log-Out</button>
+         {{if eq .Location "/" }}
+            <a href="/dashboard"><button class="primary" >Dashboard</button></a>
+            {{end}}
+          
+            
+         
+            <button hx-post="/log-out" hx-post="/register" hx-on::before-request="setIsLoggingOut();" hx-on::after-request="setSuccessToast(event.detail.xhr.response, event.detail.xhr.status)">Log-Out</button>
         {{else }}
             <a href="/register"><button class="primary">Register</button></a>
-            <button hx-get="/log-in" hx-target="#modal-container">Log-In</button>
-     
+            <button id="log-in-button" onClick="showSignInForm()">Log-In</button>
         
         {{end}}
+
     </nav>
     </header>
-
     {{block "content" .}}
     {{end}}
-
-    <div id="modal-container"></div>  
+    {{template "logInForm.component" .}}
+    <div id="modal-container">
+        
+    </div>  
     <div id="toast-container">
-        {{template "toast" .}}
+        {{template "toast.component" .}}
         {{block "toast-content" .}}
         {{end}}
     </div>  

@@ -18,28 +18,29 @@ type Router struct {
 
 type Middleware func(ReqHandler) ReqHandler
 
-type ReqHandler func(http.ResponseWriter, *http.Request, *models.ResponseModal) error
+type ReqHandler func(http.ResponseWriter, *http.Request, *models.ResponseModel) error
 
-func (router *Router) AddRoute(route Route) {
+func (router *Router) addRoute(route Route) {
 	pattern := fmt.Sprintf("%s %s", route.Method, route.Endpoint)
 	(*router).Mux.Handle(pattern, route.Handler)
 }
 
 func GetMux(routes Routes, staticFileServer http.Handler) *http.ServeMux {
-	router := Router{Mux: http.NewServeMux()}
 
-	router.Mux.Handle("/static/", http.StripPrefix("/static/", staticFileServer))
+	router := Router{Mux: http.NewServeMux()}
+	router.Mux.Handle("GET /static/", http.StripPrefix("/static/", staticFileServer))
 
 	for _, route := range routes {
-		router.AddRoute(route)
+		router.addRoute(route)
 	}
+
 	return router.Mux
 }
 
 func Handle(reqHandler ReqHandler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
-		m := models.ResponseModal{
+		m := models.ResponseModel{
 			IsProduction: os.Getenv("mode") == string(helpers.Production),
 		}
 		err := reqHandler(w, r, &m)
@@ -47,7 +48,7 @@ func Handle(reqHandler ReqHandler) http.HandlerFunc {
 			return
 		}
 
-		log.Println("ERROR: ", err.Error())
+		log.Println("ERROR: ", err)
 		httpError, ok := err.(httpErrors.HttpError)
 		if !ok {
 			httpError = httpErrors.ServerFail()

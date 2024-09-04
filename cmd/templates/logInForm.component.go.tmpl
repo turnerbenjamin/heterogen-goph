@@ -1,4 +1,5 @@
-<div class="modal">
+{{define "logInForm.component"}}
+<div id="sign-in-form-container" class="modal hidden">
     <script type="text/javascript">
         document.body.classList.add("disabled-scroll")
     </script>
@@ -6,10 +7,10 @@
         <div class="close-modal-button" 
         role="button"
         onclick="
-    document.getElementById(`modal-container`).innerHTML = ``;
+    document.getElementById(`sign-in-form-container`)?.classList.add(`hidden`);
     document.body.classList.remove(`disabled-scroll`)
     "></div>
-        <form hx-ext="response-targets" hx-post="/log-in"  hx-on:h hx-target-error="#log-in-form-error-target" hx-disable-elt class="auth-form">
+        <form hx-post="/log-in" hx-disable-elt class="auth-form" hx-on::before-request="setIsLoggingIn();" hx-on::after-request="clearIsLoggingIn(event.detail.xhr.status);">
             <h2 class="form-heading">Log-In</h2>
             <div class="field-group">
                 <div class="form-item">
@@ -22,8 +23,9 @@
                     <input type="password" placeholder="password" name="password" id="password" required/>
                 </div>
             </div>
+            <div class="error-message-container"></div>
             <button type="submit" class="primary">Log-In</button>
-            <div id="log-in-form-error-target" class="error-messages"></div>
         </form>
     </div>
 </div>
+{{end}}

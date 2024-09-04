@@ -31,7 +31,7 @@ func Use(middlewares ...Middleware) {
 }
 
 var globalMiddlewareRunner Middleware = func(next ReqHandler) ReqHandler {
-	return func(w http.ResponseWriter, r *http.Request, m *models.ResponseModal) error {
+	return func(w http.ResponseWriter, r *http.Request, m *models.ResponseModel) error {
 		err := chain(next, using)(w, r, m)
 		return err
 	}

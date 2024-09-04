@@ -1,0 +1,26 @@
+.dashboard{
+    display: grid;
+    grid-template-columns: auto 1fr;
+}
+
+.sidebar{
+    padding: var(--ws-6) var(--ws-6) var(--ws-8) var(--ws-4);
+    height: 100%;
+    min-height: 100vh;
+    border-right: 1px solid var(--yellow-8);
+}
+
+.sidebar h3{
+    font-size: var(--fs-lg);
+    margin-bottom: var(--ws-4);
+}
+
+.sidebar nav{
+    display: flex;
+    flex-direction: column;
+    gap: var(--ws-4);
+    margin-bottom: var(--ws-6);
+    margin-left: var(--ws-2);
+}
+
+

@@ -2,6 +2,7 @@ package httpErrors
 
 import (
 	"net/http"
+	"strings"
 )
 
 type StatusCode int
@@ -42,9 +43,9 @@ func ServerFail() HttpError {
 }
 
 func (e HttpError) Error() string {
-	msg := ""
+	lines := []string{}
 	for _, em := range e.Msgs {
-		msg += (string(em) + "\n")
+		lines = append(lines, string(em))
 	}
-	return msg + "\n"
+	return strings.Join(lines, "\n")
 }

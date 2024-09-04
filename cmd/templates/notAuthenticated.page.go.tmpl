@@ -1,0 +1,19 @@
+{{template "base.layout" .}}
+
+{{define "cssImports"}}
+<link rel="stylesheet" href="/static/css/dashboard.css">
+{{end}}
+
+{{define "title"}}
+HeteroGen - 401
+{{end}}
+
+{{define "content"}}
+<main>
+    <div class="page-inaccessible">
+        <h2 class="status-code">401</h2>
+        <h3 class="status">Unauthorized</h3>
+        <p>You must <span onclick="document.getElementById('log-in-button')?.click()">log-in</span> to access this resource</p>
+    </div>
+</main>
+{{end}}

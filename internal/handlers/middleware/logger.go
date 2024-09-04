@@ -10,7 +10,7 @@ import (
 )
 
 var Logger router.Middleware = func(next router.ReqHandler) router.ReqHandler {
-	return func(w http.ResponseWriter, r *http.Request, m *models.ResponseModal) error {
+	return func(w http.ResponseWriter, r *http.Request, m *models.ResponseModel) error {
 		start := time.Now()
 		defer func() { log.Printf("[%s] %s%s\t%s\n", r.Method, r.Host, r.URL.Path, time.Since(start)) }()
 		return next(w, r, m)

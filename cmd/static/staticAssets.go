@@ -67,7 +67,10 @@ func compressFile(srcPath string, destinationPath string) {
 	}
 	defer dotGz.Close()
 
-	gzipWriter := gzip.NewWriter(dotGz)
+	gzipWriter, err := gzip.NewWriterLevel(dotGz, gzip.BestCompression)
+	if err != nil {
+		log.Fatal(err)
+	}
 	defer gzipWriter.Close()
 
 	// Copy the contents of the original file to the gzip writer

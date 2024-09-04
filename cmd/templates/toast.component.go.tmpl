@@ -1,0 +1,6 @@
+{{define "toast.component"}}
+<div id="toast" onclick="hideToast()" >
+    <div class="toast-content"><div id="toast-icon"></div><div id="toast-message">{{.ToastMessage}}</div></div>
+    <div class="progress-bar"></div>
+</div>
+{{end}}
