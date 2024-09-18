@@ -5,7 +5,7 @@ import (
 )
 
 type Reports struct {
-	Users UserTableData
+	TableData
 }
 
 type ResponseModel struct {

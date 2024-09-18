@@ -2,6 +2,7 @@ package htmlHandler
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/turnerbenjamin/heterogen-go/internal/hg_services"
 	"github.com/turnerbenjamin/heterogen-go/internal/models"
@@ -26,12 +27,31 @@ func (uh *UsersHandler) UsersPage(w http.ResponseWriter, r *http.Request, m *mod
 }
 
 func (uh *UsersHandler) UsersTable(w http.ResponseWriter, r *http.Request, m *models.ResponseModel) error {
-	users, err := uh.service.GetAll()
+
+	//column config
+	columnQuery := r.URL.Query().Get("columns")
+	var columns []string
+	if columnQuery != "" {
+		columns = strings.Split(columnQuery, ",")
+	}
+	columnConfig, err := models.GetColumnConfig(columns)
 	if err != nil {
 		return err
 	}
 
-	m.Reports.Users = models.GetUserTableData(users, models.NameUC, models.BusinessUS, models.AdminUC, models.EmailUC)
+	//sorting config
+	var tableSortConfig *models.TableSortConfig
+	if sortingQuery := r.URL.Query().Get("sort"); sortingQuery != "" {
+		tableSortConfig = columnConfig.ApplySortingQuery(sortingQuery)
+	}
+
+	//Make Query
+	users, err := uh.service.GetAll(tableSortConfig)
+	if err != nil {
+		return err
+	}
+
+	m.Reports.TableData = models.GetUserTableData(users, columnConfig)
 	render.Component(w, r, "usersTable", m, 200)
 	return nil
 }

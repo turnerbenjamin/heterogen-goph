@@ -156,14 +156,60 @@ table{
 }
 
 th{
+  user-select: none;
   position: relative;
-  user-select:none;
   font-weight: 300;
   border: 1px solid var(--blue-4);
   border-top: none;
   padding: var(--ws-3) 0;
-
 }
+
+th button.sort-control{
+  position:absolute;
+  top:0;
+  bottom: 0;
+  right: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  justify-content: center;
+  border: none;
+  background-color: transparent;
+  padding: 0;
+}
+
+th button.sort-control:hover{
+  background-color: transparent;
+}
+
+th button.sort-control .indicator{
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+}
+
+th button.sort-control .indicator.asc{
+  border-bottom: 6px solid var(--base-3); 
+}
+
+th button.sort-control .indicator.desc{
+  border-top: 6px solid var(--base-3); 
+}
+
+.sort-control.ASC .indicator.asc{
+    border-bottom: 6px solid var(--green-ctst); 
+}
+
+.sort-control.DESC .indicator.desc{
+  border-top: 6px solid var(--green-ctst); 
+}
+
+
+
+
+
+
 
 
 th:first-of-type{
@@ -207,13 +253,19 @@ tbody tr:nth-child(even){
   }
 }
 
-.resizer:hover:not(.dragging) {
+.resizer:hover:not(.resizing) {
   .indicator{
     background-color: var(--blue-2);
   }
 }
 
-table:active .resizer:hover:not(.dragging){
+.dragged-over{
+  border-left: 2px solid var(--blue-9);
+  border-right: 2px solid var(--blue-9);
+  background-color: var(--blue-0);
+}
+
+table:active .resizer:hover:not(.resizing){
   cursor:default;
   .indicator{
     background-color: transparent;
@@ -221,7 +273,7 @@ table:active .resizer:hover:not(.dragging){
   }
 }
 
-.dragging{
+.resizing{
   .indicator{
     background-color: var(--blue-9);
   }
@@ -593,6 +645,23 @@ form.htmx-request button::after {
 .modal .auth-form{
     background-color: white;
     margin-top: 0;
+}
+
+/*SEARCH-CONTROLS FORM */
+.search-controls{
+  padding: 0;
+  border: none;
+  box-shadow: none;
+  width: 100%;
+}
+
+.searchbar{
+  padding: var(--ws-4) var(--ws-5) ;
+  border: none;
+  box-shadow: none;
+  border: 1px solid var(--base-2);
+  margin: var(--ws-4) 0;
+  font-size: var(--fs-md);
 }
 
 /* PAGE NOT ACCESSIBLE PAGES */

@@ -17,7 +17,8 @@ type Routes []Route
 
 // Wrap middeware and handler calls
 func chain(f ReqHandler, middlewares []Middleware) ReqHandler {
-	for _, m := range middlewares {
+	for i := len(middlewares) - 1; i >= 0; i-- {
+		m := middlewares[i]
 		f = m(f)
 	}
 	return f
@@ -38,9 +39,10 @@ var globalMiddlewareRunner Middleware = func(next ReqHandler) ReqHandler {
 }
 
 // Create a route with a wrapper handler containing calls to global and route specific midlewares
-func createRoute(method httpMethods.HttpMethod, endpoint string, handler ReqHandler, middlewares ...Middleware) Route {
+func createRoute(method httpMethods.HttpMethod, endpoint string, handler ReqHandler, routeSpecificmiddlewares ...Middleware) Route {
 
-	middlewares = append(middlewares, globalMiddlewareRunner)
+	middlewares := []Middleware{globalMiddlewareRunner}
+	middlewares = append(middlewares, routeSpecificmiddlewares...)
 
 	return Route{
 		Method:   method,

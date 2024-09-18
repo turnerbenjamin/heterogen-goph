@@ -10,6 +10,6 @@ HeteroGen - Dashboard
 {{end}}
 
 {{define "dashboard-content"}}
-<div id="table-container" class="table-container" hx-get="/users/table" hx-trigger="refresh-table" hx-vals="js:{config: getTableConfig()}" hx-swap="innerHTML" hx-target="this" hx-on::after-request="handleTableRefresh()">
+<div id="table-container" class="table-container" hx-get="/users/table" hx-trigger="refresh-table" hx-vals="js:{columns: getColumnParams(), sort: getSortParams()}" hx-swap="innerHTML" hx-target="this" hx-on::after-request="handleTableRefresh()">
 </div>
 {{end}}

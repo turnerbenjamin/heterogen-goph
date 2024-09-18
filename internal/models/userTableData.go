@@ -1,55 +1,53 @@
 package models
 
 import (
-	"fmt"
-	"slices"
+	"github.com/turnerbenjamin/heterogen-go/internal/httpErrors"
 )
 
-type UserTableData struct {
-	Headers []string
-	Rows    [][]string
+var nameColumn = NameUC()
+var businessColumn = BusinessUC()
+var emailColumn = EmailUC()
+var adminColumn = AdminUC()
+
+var columnLabelMapping = map[string]tableColumn{
+	nameColumn.Label:     nameColumn,
+	businessColumn.Label: businessColumn,
+	adminColumn.Label:    adminColumn,
+	emailColumn.Label:    emailColumn,
 }
 
-type userColumn string
+var defaultColumnConfig = ColumnConfig{nameColumn, businessColumn, emailColumn, adminColumn}
 
-const NameUC = userColumn("Name")
-const BusinessUS = userColumn("Business")
-const AdminUC = userColumn("Admin")
-const EmailUC = userColumn("Email")
+func GetColumnConfig(columnLabels []string) (ColumnConfig, error) {
+	if len(columnLabels) == 0 {
+		return defaultColumnConfig, nil
+	}
 
-var columnDataMapping = map[userColumn]func(User) string{
-	NameUC: func(u User) string {
-		return fmt.Sprintf("%s %s", u.FirstName, u.LastName)
-	},
-	BusinessUS: func(u User) string {
-		return "-"
-	},
-	AdminUC: func(u User) string {
-		if slices.Contains(u.Permissions, "admin") {
-			return "✓"
+	columnConfig := ColumnConfig{}
+	for _, columnLabel := range columnLabels {
+		if col, ok := columnLabelMapping[columnLabel]; ok {
+			columnConfig = append(columnConfig, col)
+		} else {
+			return nil, httpErrors.InvalidColumnConfig(columnLabel)
 		}
-		return "✕"
-	},
-	EmailUC: func(u User) string {
-		return string(u.EmailAddress)
-	},
+	}
+	return columnConfig, nil
 }
 
-func GetUserTableData(users []User, columns ...userColumn) UserTableData {
-	tableData := UserTableData{
-		Headers: []string{},
+func GetUserTableData(users []User, columns ColumnConfig) TableData {
+	tableData := TableData{
+		Headers: []tableColumn{},
 		Rows:    [][]string{},
 	}
 
 	for _, col := range columns {
-		tableData.Headers = append(tableData.Headers, string(col))
+		tableData.Headers = append(tableData.Headers, col)
 	}
 
 	for _, user := range users {
 		rowData := []string{}
 		for _, col := range columns {
-			getColData := columnDataMapping[col]
-			rowData = append(rowData, getColData(user))
+			rowData = append(rowData, col.Data(user))
 		}
 		tableData.Rows = append(tableData.Rows, rowData)
 	}
@@ -57,10 +55,3 @@ func GetUserTableData(users []User, columns ...userColumn) UserTableData {
 	return tableData
 
 }
-
-// var nameUserColumn column = column{
-// 	name: "Name",
-// 	getData: func(u User) string{
-// 		return fmt.Sprintf("%s %s", u.FirstName, u.LastName)
-// 	},
-// }

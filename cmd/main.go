@@ -19,6 +19,7 @@ import (
 	"github.com/turnerbenjamin/heterogen-go/internal/routeMapping"
 	"github.com/turnerbenjamin/heterogen-go/internal/router"
 	"github.com/vearutop/statigz"
+	"github.com/vearutop/statigz/brotli"
 )
 
 func main() {
@@ -29,7 +30,7 @@ func main() {
 
 	staticFileServer := helpers.SelectValueByMode(mode, helpers.ValueSelector[http.Handler]{
 		Development: http.FileServer(http.Dir("./cmd/static/")),
-		Production:  statigz.FileServer(staticAssets.FileSystem),
+		Production:  statigz.FileServer(staticAssets.FileSystem, brotli.AddEncoding),
 	})
 
 	//*Template config

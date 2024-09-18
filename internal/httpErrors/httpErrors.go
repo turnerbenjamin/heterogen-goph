@@ -1,6 +1,7 @@
 package httpErrors
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 )
@@ -32,6 +33,14 @@ func InvalidFormSubmission(errorMessages []ErrorMessage) HttpError {
 	return HttpError{
 		StatusCode: http.StatusUnprocessableEntity, //422
 		Msgs:       errorMessages,
+	}
+}
+
+func InvalidColumnConfig(label string) HttpError {
+	msg := fmt.Sprintf("Invalid column configuration (%s)", label)
+	return HttpError{
+		StatusCode: http.StatusUnprocessableEntity, //422
+		Msgs:       errorMessages{ErrorMessage(msg)},
 	}
 }
 

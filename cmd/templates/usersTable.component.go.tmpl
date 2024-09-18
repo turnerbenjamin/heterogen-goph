@@ -1,16 +1,19 @@
+<form class="search-controls">
+    <input type="text" class="searchbar" placeholder="Search...">
+</form>
 <table>
     <thead>
         <tr>
-            {{range $header := .Reports.Users.Headers}}
-            <th><div class="resizer"><div class="indicator"></div></div><div draggable="true">{{$header}}</div></th>
+            {{range $header := .Reports.TableData.Headers}}
+            <th data-label="{{$header.Label}}" ><div class="resizer"><div class="indicator"></div></div><div class="draggable-header" draggable="true" >{{$header.Label}}</div><button class="sort-control {{$header.Sort}}" hx-on:click="handleSorting(event)" data-sort="{{$header.Sort}}"><div class="indicator asc"></div><div class="indicator desc"></div></button></th>
             {{end}}
           </tr>
     </thead>
     <tbody>
-        {{range $row := .Reports.Users.Rows}}
+        {{range $row := .Reports.TableData.Rows}}
             <tr>
-                {{range $field := $row}}
-                    <td>{{$field}}</td>
+                {{range $i, $field := $row}}
+                    <td class="{{ if (index $.Reports.TableData.Headers $i).Centered }} centered-text{{end}}">{{$field}}</td>
                 {{end}}
             </tr>
         {{end}}

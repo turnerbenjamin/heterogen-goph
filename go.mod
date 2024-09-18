@@ -7,3 +7,5 @@ require (
 	github.com/vearutop/statigz v1.4.3 //GzipServer
 	golang.org/x/crypto v0.26.0 //Bcrypt
 )
+
+require github.com/andybalholm/brotli v1.1.0 // indirect
