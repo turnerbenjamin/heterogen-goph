@@ -1,0 +1,56 @@
+{{template "dashboard.layout" .}}
+
+
+{{define "title"}}
+HeteroGen - Dashboard
+{{end}}
+
+{{define "dashboardCss"}}
+<link href="https://api.mapbox.com/mapbox-gl-js/v3.6.0/mapbox-gl.css" rel="stylesheet">
+{{end}}
+
+{{define "dashboardJs"}}
+<script src="https://api.mapbox.com/mapbox-gl-js/v3.6.0/mapbox-gl.js" defer></script>
+<script src="/static/js/map.js" defer></script>
+{{end}}
+
+
+
+
+{{define "dashboard-content"}}
+<section class="dash-form">
+    <form hx-post="/register"
+        hx-disabled-elt="this" hx-on::before-request="setIsRegistering();" hx-on::after-error="clearIsRegistering();" hx-on::after-request="handleErrors(event); this.classList.remove('htmx-request')">
+        <h2 class="form-heading">Add Business</h2>
+
+        <div class="field-group">
+            <div class="form-item required">
+                <label for="trading_name">Trading Name</label>
+                <input type="text" placeholder="J Doe and Sons" name="trading_name" id="trading_name" {{range $attribute
+                    :=.Validators.TradingName}} {{$attribute}} {{end}}>
+            </div>
+        </div>
+
+        <div class="field-group">
+            <div class="form-item required">
+                <label for="postcode">Postcode</label>
+                <input type="text" placeholder="NG7 1NU" name="postcode" id="postcode" {{range $attribute
+                    :=.Validators.TradingName}} {{$attribute}} {{end}}>
+            </div>
+        </div>
+        <div id="location-picker"></div>
+        <div class="field-group">
+            <div class="form-item required">
+                <label for="is_grower">Is a grower?</label>
+                <select id="is_grower" name="is_grower" value="false">
+                    <option value="false">No</option>
+                    <option value="true">Yes</option>
+                  </select>
+            </div>
+        </div>
+
+        <div class="error-message-container"></div>
+        <button type="submit" class="primary">Create</button>
+    </form>
+</section>
+{{end}}

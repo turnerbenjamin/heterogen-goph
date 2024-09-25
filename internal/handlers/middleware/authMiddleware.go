@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"fmt"
 	"net/http"
 	"slices"
 
@@ -15,7 +14,6 @@ import (
 func GetUserAuthenticator(authService hg_services.HgAuthService) router.Middleware {
 	return func(next router.ReqHandler) router.ReqHandler {
 		return func(w http.ResponseWriter, r *http.Request, m *models.ResponseModel) error {
-			fmt.Println("GET USER")
 			m.Location = r.URL.Path
 			if m.Location == "" {
 				m.Location = "/"
@@ -39,8 +37,6 @@ func GetUserAuthenticator(authService hg_services.HgAuthService) router.Middlewa
 func RequireAuthentication() router.Middleware {
 	return func(next router.ReqHandler) router.ReqHandler {
 		return func(w http.ResponseWriter, r *http.Request, m *models.ResponseModel) error {
-			fmt.Println("AUTH HANDLER")
-			fmt.Println("CHECK USER: ", m.User)
 			if m.User == nil {
 				return render.Page(w, r, "notAuthenticated", m, http.StatusAccepted)
 			}
@@ -52,7 +48,6 @@ func RequireAuthentication() router.Middleware {
 func RequireAdmin() router.Middleware {
 	return func(next router.ReqHandler) router.ReqHandler {
 		return func(w http.ResponseWriter, r *http.Request, m *models.ResponseModel) error {
-			fmt.Println("CHECK ADMIN: ", m.User)
 			if m.User == nil || !slices.Contains(m.User.Permissions, "admin") {
 				return render.Page(w, r, "forbidden", m, http.StatusAccepted)
 			}

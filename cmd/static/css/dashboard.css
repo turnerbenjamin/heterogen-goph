@@ -23,4 +23,32 @@
     margin-left: var(--ws-2);
 }
 
+.sidebar .nav-sublinks{
+    visibility: hidden;
+    opacity: 0;
+    transform:scale(1, 0);
+    height: 0;
+    transition: visibility 0s, opacity 0.3s, transform 0.3s linear;
+}
+
+.sidebar .nav-resource:hover .nav-sublinks{
+    visibility: visible;
+    opacity: 1;
+    transform:scale(1,1);
+    height: auto;
+    padding: var(--ws-4);
+    padding-right: 0;
+}
+
+.sidebar .nav-sublinks a{
+    color: var(--blue-6);
+}
+
+#location-picker{
+    width: 100%;
+    background-color: var(--base-2);
+    aspect-ratio: 1/1;
+
+}
+
 

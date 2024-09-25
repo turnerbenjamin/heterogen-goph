@@ -55,17 +55,19 @@ func main() {
 	//*Services
 	authService := hg_services.NewAuthService(db)
 	userService := hg_services.NewUsersService(db)
+	businessService := hg_services.NewBusinessServiceService(db)
 
 	//*Handlers
 	authHandler := htmlHandler.NewAuthHandler(authService)
 	userHandler := htmlHandler.NewUsersHandler(userService)
+	businessHandler := htmlHandler.NewBusinessesHandler(businessService)
 
 	//*Middlewares
 	router.Use(middleware.Logger)
 	router.Use(middleware.GetUserAuthenticator(authService))
 
 	//*routes
-	routeMapping := routeMapping.Get(authHandler, userHandler)
+	routeMapping := routeMapping.Get(authHandler, userHandler, businessHandler)
 	mux := router.GetMux(routeMapping, staticFileServer)
 
 	log.Fatal(http.ListenAndServe(":8080", mux))

@@ -36,7 +36,7 @@
             <button hx-post="/log-out" hx-post="/register" hx-on::before-request="setIsLoggingOut();" hx-on::after-request="setSuccessToast(event.detail.xhr.response, event.detail.xhr.status)">Log-Out</button>
         {{else }}
             <a href="/register"><button class="primary">Register</button></a>
-            <button id="log-in-button" onClick="showSignInForm()">Log-In</button>
+            <button id="log-in-button" onClick="showSignInForm(); document.body.classList.add('disabled-scroll')">Log-In</button>
         
         {{end}}
 

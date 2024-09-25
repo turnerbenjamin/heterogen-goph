@@ -5,19 +5,28 @@ function isSuccess(statusCode){
 
 //ANIMATE TOAST
 let toastTimeout
+const toastContainer = document.getElementById("toast-container")
 const toastEl = document.getElementById("toast")
 const toastmessage = document.getElementById("toast-message")
 const toastIcon = document.getElementById("toast-icon")
 
 function hideToast(){
-    toastEl.classList.remove("show")
+    if(!toastTimeout) return;
     toastEl.classList.add("hide")
+    toastEl.classList.remove("show")
     clearTimeout(toastTimeout)
+    toastTimeout = undefined;
 }
 
 function updateToast(){
+    if(toastTimeout) hideToast()
     const toastmessage = document.getElementById("toast-message")
     if(!toastmessage?.innerText) return
+
+    const containerTop = toastContainer.getBoundingClientRect().top
+    const containerPadding = containerTop < 5 ? 5 - containerTop : 0;
+    toastContainer.style.paddingTop = containerPadding + "px"; 
+
     toastEl.classList.add("show")
     toastEl.classList.remove("hide")
     toastTimeout = setTimeout(hideToast, 7600)
@@ -32,6 +41,7 @@ function setSuccessToast(msg, status = 200){
 }
 
 function setErrorToast(msg){
+    console.log(msg)
     toastmessage.innerHTML = msg
     toastIcon.innerText = "✖"
     toastEl.classList.add("show", "error")

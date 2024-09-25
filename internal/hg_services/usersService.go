@@ -23,7 +23,6 @@ func NewUsersService(database *sql.DB) UsersService {
 }
 
 func (userSvc *usersService) GetAll(tableSortConfig *models.TableSortConfig) ([]models.User, error) {
-	fmt.Println(tableSortConfig)
 	baseQuery := `
 	SELECT id, email_address, password, first_name, last_name, business, permissions 
 	FROM (

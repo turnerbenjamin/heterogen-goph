@@ -31,6 +31,7 @@ func Load() {
 		}
 		key := kv[:separator]
 		value := kv[separator+1:]
+		log.Println(key, value)
 		os.Setenv(key, value)
 	}
 

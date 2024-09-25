@@ -1,6 +1,5 @@
-
 {{define "dashboard.layout"}}
-    {{template "base.layout" .}} 
+{{template "base.layout" .}}
 {{end}}
 
 {{define "cssImports"}}
@@ -17,18 +16,32 @@
     <aside class="sidebar">
         <nav class="admin-links">
             <h3>Admin</h3>
-            <a href="/users" {{if eq .Location "/users" }} class="active-link" {{end}}>Users</a>
-            <a href="/populations">Populations</a>
-            <a href="/seed-lots">Seed</a>
+            <div class="nav-resource">
+                <a href="/users" {{if eq .Location "/users" }} class="active-link" {{end}}>Users</a>
+            </div>
+            <div class="nav-resource">
+                <a href="/businesses" {{if eq .Location "/businesses" }} class="active-link" {{end}}>Businesses</a>
+                <div class="nav-sublinks">
+                    <a href="/add-business" {{if eq .Location "/add-business" }} class="active-link" {{end}}>Add</a>
+                </div>
+            </div>
+            <div class="nav-resource">
+                <a href="/populations">Populations</a>
+            </div>
+            <div class="nav-resource">
+                <a href="/seed-lots">Seed</a>
+            </div>
         </nav>
         <nav class="user-links">
             <h3>My Business</h3>
-            <a href="/populations">Seed Received</a>
-            <a href="/seed-lots">Seed Issued</a>
+            <div class="nav-resource">
+                <a href="/populations">Seed Received</a>
+            </div>
+            <div class="nav-resource">
+                <a href="/seed-lots">Seed Issued</a>
+            </div>
         </nav>
     </aside>
     {{block "dashboard-content" .}}{{end}}
 </div>
-    {{end}}
-
-
+{{end}}
