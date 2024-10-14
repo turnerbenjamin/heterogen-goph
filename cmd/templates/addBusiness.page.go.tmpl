@@ -7,45 +7,81 @@ HeteroGen - Dashboard
 
 {{define "dashboardCss"}}
 <link href="https://api.mapbox.com/mapbox-gl-js/v3.6.0/mapbox-gl.css" rel="stylesheet">
+<link href="/static/css/map.css" rel="stylesheet">
 {{end}}
 
 {{define "dashboardJs"}}
 <script src="https://api.mapbox.com/mapbox-gl-js/v3.6.0/mapbox-gl.js" defer></script>
 <script src="/static/js/map.js" defer></script>
+<script>
+    function updateCPHNumber(){
+        const v = document.getElementById('is_grower').value
+        const cphNumberEl = document.getElementById('cph_number')
+        const cphNumberWrapper = cphNumberEl.closest(".form-item")
+        cphNumberEl.disabled = v !== "true"
+        v == 'true' ? cphNumberWrapper.classList.remove("hidden") : cphNumberWrapper.classList.add("hidden")
+
+    }
+</script>
 {{end}}
 
 
 
 
 {{define "dashboard-content"}}
-<section class="dash-form">
-    <form hx-post="/register"
-        hx-disabled-elt="this" hx-on::before-request="setIsRegistering();" hx-on::after-error="clearIsRegistering();" hx-on::after-request="handleErrors(event); this.classList.remove('htmx-request')">
+<section class="dash-form" onload="updateCPHNumber()">
+    <form hx-post="/businesses" hx-disabled-elt="this" hx-swap="none"
+        hx-on::after-request="handleErrors(event); this.classList.remove('htmx-request')">
         <h2 class="form-heading">Add Business</h2>
 
         <div class="field-group">
             <div class="form-item required">
                 <label for="trading_name">Trading Name</label>
-                <input type="text" placeholder="J Doe and Sons" name="trading_name" id="trading_name" {{range $attribute
+                <input type="text" placeholder="J. Doe Seeds" name="trading_name" id="trading_name" {{range $attribute
                     :=.Validators.TradingName}} {{$attribute}} {{end}}>
+            </div>
+            <div class="form-item required">
+                <label for="email_address">Email</label>
+                <input type="email" placeholder="jane@jd-seeds.co.uk" name="email_address" id="email_address" {{range
+                    $attribute :=.Validators.EmailAddress}} {{$attribute}} {{end}}>
             </div>
         </div>
 
         <div class="field-group">
             <div class="form-item required">
-                <label for="postcode">Postcode</label>
-                <input type="text" placeholder="NG7 1NU" name="postcode" id="postcode" {{range $attribute
-                    :=.Validators.TradingName}} {{$attribute}} {{end}}>
+                <label for="address-line-1">Address</label>
+                <input class="required" type="text" placeholder="Line 1" name="address-line-1" id="address-line-1"
+                    {{range $attribute :=.Validators.AddressLine1}} {{$attribute}} {{end}}>
+                <input type="text" placeholder="Line 2" name="address-line-2" id="address-line-2" {{range $attribute
+                    :=.Validators.AddressLine2}} {{$attribute}} {{end}}>
+                <input type="text" placeholder="Line 3" name="address-line-3" id="address-line-3" {{range $attribute
+                    :=.Validators.AddressLine3}} {{$attribute}} {{end}}>
+                <input type="text" placeholder="Postcode" name="postcode" id="postcode" {{range $attribute
+                    :=.Validators.Postcode}} {{$attribute}} {{end}}>
             </div>
         </div>
-        <div id="location-picker"></div>
+
         <div class="field-group">
             <div class="form-item required">
-                <label for="is_grower">Is a grower?</label>
-                <select id="is_grower" name="is_grower" value="false">
+                <label>Location</label>
+                <div id="location-picker"></div>
+                <input class="hidden" type="text" name="latitude" id="latitude" placeholder="Latitude">
+                <input class="hidden" type="text" name="longitude" id="longitude" placeholder="Longitude">
+            </div>
+
+        </div>
+        <div class="field-group">
+            <div class="form-item required">
+                <label for="is_grower">Grower</label>
+                <select id="is_grower" name="is_grower" value="false" onchange="updateCPHNumber()">
                     <option value="false">No</option>
                     <option value="true">Yes</option>
-                  </select>
+                </select>
+            </div>
+            <div class="form-item">
+                <label for="cph_number" >CPH Number</label>
+                <input type="text" id="cph_number" name="cph_number" placeholder="00/000/0000" disabled {{range $attribute
+                    :=.Validators.CphNumber}} {{$attribute}} {{end}}/>
             </div>
         </div>
 

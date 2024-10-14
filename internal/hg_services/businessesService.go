@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"strings"
 
+	"github.com/lib/pq"
 	"github.com/turnerbenjamin/heterogen-go/internal/httpErrors"
 	"github.com/turnerbenjamin/heterogen-go/internal/models"
 )
@@ -28,25 +29,25 @@ CREATE A NEW BUSINESS
 func (bs *businessService) Create(bns models.Business) (*models.Business, error) {
 	baseQuery := `
 	INSERT INTO businesses
-	(id, reference, trading_name, location, postcode, is_grower, cph_number, logo, about, email_address, website)
+	(id, reference, trading_name, location, address, postcode, is_grower, cph_number, email_address)
 	VALUES($1,$2,$3,$4,$5,$6,$7)
-	RETURNING id, reference, trading_name, location, postcode, is_grower, cph_number, logo, about, email_address, website
+	RETURNING id, reference, trading_name, location, address, postcode, is_grower, cph_number, email_address
 	;
 	`
 	var nb models.Business
-	rows, err := bs.db.Query(baseQuery, bns.Id, bns.Reference, bns.TradingName, bns.Location, bns.Postcode, bns.IsGrower, bns.CPH_Number, bns.Logo, bns.About, bns.EmailAddress, bns.Website)
+	rows, err := bs.db.Query(baseQuery, bns.Id, bns.Reference, bns.TradingName, bns.Location, pq.Array(bns.Address), bns.Postcode, bns.IsGrower, bns.CphNumber, bns.EmailAddress)
 
 	if err != nil {
 		if strings.Contains(err.Error(), "businesses_trading_name_key") {
 			return nil, httpErrors.Make(401, []httpErrors.ErrorMessage{"Trading name is already associated with a business"})
 		}
-		return nil, httpErrors.ServerFail()
+		return nil, err
 	}
 
 	if rows.Next() {
-		err := rows.Scan(&nb.Id, &nb.Reference, nb.TradingName, nb.Location, nb.Postcode, nb.IsGrower, nb.CPH_Number, bns.Logo, bns.About, bns.EmailAddress, bns.Website)
+		err := rows.Scan(&nb.Id, &nb.Reference, nb.TradingName, nb.Location, nb.Address, nb.Postcode, nb.IsGrower, nb.CphNumber, bns.EmailAddress)
 		if err != nil {
-			return nil, httpErrors.ServerFail()
+			return nil, err
 		}
 	}
 	return &nb, nil

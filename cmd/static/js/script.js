@@ -107,17 +107,16 @@ if(didRegister){
 
 
 
-
-
-
-
-
 //GLOBAL ERROR HANDLING
 function handleErrors(e){  
-    if (isSuccess(e.detail.xhr.status)) return
+    
     const errorMessageContainerEl = e.target.getElementsByClassName("error-message-container") 
+    if (isSuccess(e.detail.xhr.status)) {
+        errorMessageContainerEl[0].innerHTML = ""
+        return
+    }
     const errorMarkup = e.detail.xhr.response
-    console.l    
+ 
     if(errorMessageContainerEl.length > 0){
         errorMessageContainerEl[0].innerHTML = errorMarkup
     }else{

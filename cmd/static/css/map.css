@@ -1,0 +1,18 @@
+.marker-wrapper{
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    cursor: pointer;
+    background-color: var(--blue-2);  
+    padding: var(--ws-4);
+}
+
+.marker {
+    width: 100%;
+    height: 100%;
+  }
+
+.marker.business{
+    background-image: url('/static/images/icons/silo.svg');
+    background-size:contain;
+}

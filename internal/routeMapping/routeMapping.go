@@ -27,6 +27,7 @@ func Get(authHandler *htmlHandler.AuthHandler, userHandler *htmlHandler.UsersHan
 
 		//*BUSINESSES RESOURCES
 		router.Get("/add-business", businessHandler.AddBusinessPage, middleware.RequireAuthentication(), middleware.RequireAdmin()),
+		router.Post("/businesses", businessHandler.CreateBusiness, middleware.RequireAuthentication(), middleware.RequireAdmin()),
 		//NOT FOUND
 		// router.Get("/", htmlHandler.HomeHandler),
 
